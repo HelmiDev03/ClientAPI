@@ -18,6 +18,7 @@ const CompanySchema = new Schema({
     city : { type: String, required: false },
     zip : { type: String, required: false },
     country : { type: String, required: false },
+    //pack for the company forregin key mouch taw chnhotou
 
 },
   {

@@ -1,9 +1,11 @@
 const Users = require('../models/user');
 const Companies = require('../models/company');
 const VerificationToken = require('../models/authverification/VerificationToken');
+const ForgetPasswordToken = require('../models/forgetpassword/forgetPasswordToken');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
+const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const {emailPattern , namePattern , phonePattern} = require('..//pattern')
 
 
@@ -28,6 +30,24 @@ const VerifyEmail = async (req, res) => {
     catch (err) {
         return res.status(500).json({ message: err.message })
     }
+}
+
+
+const EmailExist =  async(req,res) => {
+   
+    try{
+    const user = await Users.findOne({email : req.body.email})
+    if(user) {
+        return res.status(200).json({exist : true})
+    }
+    else {
+        return res.status(401).json({'email' : 'Email not found'})
+    }
+    }
+    catch(error) {
+        return res.status(500).json({error : error})
+    }
+
 }
 
 const VerifyCin = async (req, res) => {
@@ -331,12 +351,130 @@ const UpdatePassword = async (req, res) => {
     }
 }
 
+const UpdateProfilePicture = (req, res) => {
+    uploadImage(req.body.image)
+      .then((url) => res.send(url))
+      .catch((err) => res.status(500).send(err));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+const ForgetPassword = async (req, res) => {
+    try {
+        const email = req.body.email;
+        
+        const user  = await Users.findOne({email})
+        if (!user) {
+            return res.status(400).json({ message: 'Email not found' })
+        }
+        const findToken = await ForgetPasswordToken.findOne({ userId: user._id });
+        if (findToken){
+            return res.status(400).json({ message: 'you attempt to send otp in the last 5 minutes , please try again later' })
+            
+        } 
+         const result = await SendOtp(user)
+        return res.status(200).json({ message: 'Otp sent to your email' , token : result.id , expiredAt : result.expiredAt})
+        
+       
+       
+    
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+
+}
+
+
+const VerifyTokenResetPasswordExist = async (req, res) => {
+    try {
+        const {  tokenid } = req.body;
+        const findToken = await ForgetPasswordToken.findById(tokenid);
+        if (!findToken) {
+            return res.status(400).json({ message: 'Invalid token' })
+        }
+        return res.status(200).json({ message: 'Token verified successfully' })
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+} 
+        
+const VerifyOtp = async (req, res) => {
+    const { email, token } = req.body;
+    console.log(email, token)
+    try {
+        const user = await Users.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email not found' })
+        }
+        const findToken = await ForgetPasswordToken.findOne({ userId: user._id });
+        if (!findToken) {
+            return res.status(400).json({ message: 'Otp not found' })
+        }
+        if (findToken.token !== token) {
+            return res.status(400).json({ message: 'Invalid Otp' })
+        }
+        if (findToken.expiresIn < Date.now()) {
+            return res.status(400).json({ message: 'Otp expired' })
+        }
+        return res.status(200).json({ message: 'Otp verified successfully' })
+    }
+
+
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+
+
+
+
+}
+const ChangePassword = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await Users.findOne({email})
+        if (!user) {
+            return res.status(400).json({ message: 'Email not found' })
+        }
+        const hashed = await bcrypt.hashSync(password, 10);
+        const updateduser = await Users.findOneAndUpdate({ email }, { password: hashed }, { new: true });
+        if (updateduser){
+            return res.status(200).json({ message: 'Password Successfully Updated' })
+        }
+        else{
+            return res.status(500).json({ message: 'Error' })
+        
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+  
+
 
 
 
 
 module.exports = {
     VerifyEmail,
+    EmailExist,
     VerifyCin,
     Verifyphone ,
     Register,
@@ -344,4 +482,9 @@ module.exports = {
     ConfirmMail,
     UpdatePersonalInformation,
     UpdatePassword,
+    UpdateProfilePicture,
+    ForgetPassword,
+    VerifyTokenResetPasswordExist,
+    VerifyOtp,
+    ChangePassword,
 }

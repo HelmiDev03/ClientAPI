@@ -14,7 +14,8 @@ const UserSchema = new Schema({
   lastname: { type: String, required: true },
   email: { type: String, required: true, unique: true, trim: true },
   cin : { type: String, required: true , unique: true},
-  role: { type: String, required: true, default: 'employee'},
+  role: { type: String, required: true, default: 'employee'},//pour le momoen
+  //permisiion taw baed
 
   password: { type: String, required: false },
   username : { type: String, required: false , unique: true},
@@ -31,6 +32,8 @@ const UserSchema = new Schema({
   country: { type: String, default: 'tunisia'},
   postalcode: { type: String, required: false },
 
+
+  //hedhom lezem kinged fazt google
   googleid: { type: String, required: false ,unique: true},
   secret: { type: String, required: false , unique: true},
 
