@@ -11,6 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(passport.initialize());
 require('./apiprotection/passport')(passport);
+const fileupload = require('express-fileupload'); 
+
+app.use(fileupload({useTempFiles: true}))
 
 const mongoose = require('mongoose');
 //express session

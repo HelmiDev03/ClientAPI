@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
-const {emailPattern , namePattern , phonePattern} = require('..//pattern')
+const { emailPattern, namePattern, phonePattern } = require('..//pattern')
+const  uploadImage = require('../mediaUpload/uploadmediaconfig')
+//const deleteImage = require('../mediaUpload/mediaconfig');
 
 
 
@@ -14,16 +16,16 @@ const {emailPattern , namePattern , phonePattern} = require('..//pattern')
 const VerifyEmail = async (req, res) => {
     try {
         const { email } = req.body;
-       
+
         const findeuser = await Users.findOne({ email: email });
-        
+
 
         if (findeuser) {
             return res.status(400).json({ message: 'Email is already taken' })
-            
+
         }
         else {
-           return  res.status(200).json({ message: 'Email is available' })
+            return res.status(200).json({ message: 'Email is available' })
         }
 
     }
@@ -33,57 +35,57 @@ const VerifyEmail = async (req, res) => {
 }
 
 
-const EmailExist =  async(req,res) => {
-   
-    try{
-    const user = await Users.findOne({email : req.body.email})
-    if(user) {
-        return res.status(200).json({exist : true})
+const EmailExist = async (req, res) => {
+
+    try {
+        const user = await Users.findOne({ email: req.body.email })
+        if (user) {
+            return res.status(200).json({ exist: true })
+        }
+        else {
+            return res.status(401).json({ 'email': 'Email not found' })
+        }
     }
-    else {
-        return res.status(401).json({'email' : 'Email not found'})
-    }
-    }
-    catch(error) {
-        return res.status(500).json({error : error})
+    catch (error) {
+        return res.status(500).json({ error: error })
     }
 
 }
 
 const VerifyCin = async (req, res) => {
     try {
-        
-       
+
+
         const findeuser = await Users.findOne({ cin: req.body.cin });
         console.log(findeuser)
-        
+
 
         if (findeuser) {
-           return res.status(400).json({ message: 'Cin is already used' })
-            
+            return res.status(400).json({ message: 'Cin is already used' })
+
         }
         else {
-           return    res.status(200).json({ message: 'Cin is available' })
+            return res.status(200).json({ message: 'Cin is available' })
         }
 
     }
     catch (err) {
-       return  res.status(500).json({ message: err.message })
+        return res.status(500).json({ message: err.message })
     }
 
 }
 
-const Verifyphone  = async (req, res) => {
+const Verifyphone = async (req, res) => {
     try {
-            
-            const findcompany = await Companies.findOne({ phonenumber: req.body.phonenumber });
-            if (findcompany) {
-                return res.status(400).json({ message: 'Phone number is already used by other company' })
-                
-            }
-            else {
-                return res.status(200).json({ message: 'Phone number is available' })
-            }
+
+        const findcompany = await Companies.findOne({ phonenumber: req.body.phonenumber });
+        if (findcompany) {
+            return res.status(400).json({ message: 'Phone number is already used by other company' })
+
+        }
+        else {
+            return res.status(200).json({ message: 'Phone number is available' })
+        }
 
     }
     catch (err) {
@@ -91,15 +93,15 @@ const Verifyphone  = async (req, res) => {
     }
 }
 
-const Register = async(req, res) => {
+const Register = async (req, res) => {
 
-    try{
+    try {
         console.log(req.body)
-        const {email , role , firstname , lastname , cin ,password ,  domaine , comanyname , phonenumber } = req.body;
+        const { email, role, firstname, lastname, cin, password, domaine, comanyname, phonenumber } = req.body;
         const findeuser = await Users.findOne({ email: email });
         if (findeuser) {
             return res.status(400).json({ message: 'Email is already taken' })
-             
+
         }
         const hash = await bcrypt.hashSync(password, 10);
         const company = await Companies.create({
@@ -108,25 +110,25 @@ const Register = async(req, res) => {
             phonenumber,
         })
         await company.save()
-        const user  =  await Users.create({
+        const user = await Users.create({
             firstname,
             lastname,
             email,
             cin,
             role,
             password: hash,
-            company : company._id
+            company: company._id
         })
         await user.save()
         user.password = undefined
         SendVerificationMail(user)
-        return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification' ,user , company })
+        return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
 
 
 
 
-    catch(err){
+    catch (err) {
         res.status(500).json({ message: err.message })
     }
 
@@ -140,9 +142,9 @@ const Register = async(req, res) => {
 
 const Login = async (req, res) => {
     try {
-        const { emailorcin ,  password } = req.body;
+        const { emailorcin, password } = req.body;
 
-        const findUserWithEmail = await Users.findOne({ email:emailorcin });
+        const findUserWithEmail = await Users.findOne({ email: emailorcin });
         const findUserWithCin = await Users.findOne({ cin: emailorcin });
 
         if (!findUserWithEmail && !findUserWithCin) {
@@ -151,19 +153,19 @@ const Login = async (req, res) => {
 
         // Check if user's password is not undefined before comparing
         const findUser = findUserWithEmail ? findUserWithEmail : findUserWithCin;
-        
+
         const comparePassword = await bcrypt.compare(password, findUser.password);
 
         if (!comparePassword) {
             return res.status(400).json({ message: "Invalid Credentials" });
         }
 
-        if ( ! findUser.isVerified){
-               SendVerificationMail(findUser);
+        if (!findUser.isVerified) {
+            SendVerificationMail(findUser);
 
             return res.status(400).json({ message: "Please Check Your MailBox To Verify your email" });
         }
-  
+
 
         const token = jwt.sign(
             {
@@ -171,7 +173,7 @@ const Login = async (req, res) => {
                 firstname: findUser.firstname,
                 lastname: findUser.lastname,
                 email: findUser.email,
-                cin : findUser.cin,
+                cin: findUser.cin,
                 role: findUser.role,
                 role: findUser.role,
                 username: findUser.username,
@@ -180,13 +182,13 @@ const Login = async (req, res) => {
                 dateofbirth: findUser.dateofbirth,
                 matricule: findUser.matricule,
                 createdAt: findUser.createdAt,
-                gender : findUser.gender,
-                maritalstatus : findUser.maritalstatus,
-                nationality :   findUser.nationality,
-                adress : findUser.adress,
-                city : findUser.city,
-                country : findUser.country,
-                postalcode : findUser.postalcode,
+                gender: findUser.gender,
+                maritalstatus: findUser.maritalstatus,
+                nationality: findUser.nationality,
+                adress: findUser.adress,
+                city: findUser.city,
+                country: findUser.country,
+                postalcode: findUser.postalcode,
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -197,14 +199,14 @@ const Login = async (req, res) => {
             process.env.PRIVATE_KEY,
             { expiresIn: '7d' }
         )
-       
 
-        
+
+
 
         return res.status(200).json({
             message: "Success",
             token: "Bearer " + token,
-            refreshToken : "Bearer " + refreshToken,
+            refreshToken: "Bearer " + refreshToken,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -214,31 +216,31 @@ const Login = async (req, res) => {
 
 const ConfirmMail = async (req, res) => {
     try {
-        
-        
+
+
         const finduser = await Users.findById(req.params.Userid);
         console.log(finduser)
-        
+
         if (!finduser) {
             return res.status(404).json({ message: "Invalid link" });
         }
-        
+
         const token = await VerificationToken.findOne({ userId: req.params.Userid, token: req.params.token });
         console.log(token)
-        
-        if ( finduser.isVerified) {
+
+        if (finduser.isVerified) {
             return res.status(404).json({ message: "Email verified successfully" });
         }
-      
+
         if (!token) {
             return res.status(404).json({ message: "Invalid link" });
         }
         if (token.expiresIn < Date.now()) {
             return res.status(404).json({ message: "Link expired" });
         }
-        
+
         await Users.findByIdAndUpdate(req.params.Userid, { isVerified: true });
-        
+
         await VerificationToken.findOneAndDelete({ userId: req.params.id });
         return res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
@@ -247,21 +249,21 @@ const ConfirmMail = async (req, res) => {
 };
 
 
-const  UpdatePersonalInformation = async (req, res) => {
+const UpdatePersonalInformation = async (req, res) => {
 
-    try{
-        const errors  = {}
-        const {firstname , lastname , phonenumber , birthday , maritalstatus , gender , country ,adress,city,postalcode}= req.body;
-            if (!namePattern.test(firstname)) {
-                errors.firstname = 'Invalid firstname'
-            }
-        
-       
-            if (!namePattern.test(lastname)) {
-                errors.lastname = 'Invalid lastname'
-            }
-        
-         if (phonenumber){
+    try {
+        const errors = {}
+        const { firstname, lastname, phonenumber, birthday, maritalstatus, gender, country, adress, city, postalcode } = req.body;
+        if (!namePattern.test(firstname)) {
+            errors.firstname = 'Invalid firstname'
+        }
+
+
+        if (!namePattern.test(lastname)) {
+            errors.lastname = 'Invalid lastname'
+        }
+
+        if (phonenumber) {
             if (!phonePattern.test(phonenumber)) {
                 errors.phonenumber = 'Invalid phonenumber'
             }
@@ -271,7 +273,7 @@ const  UpdatePersonalInformation = async (req, res) => {
                 errors.phonenumber = 'Phone number is already used'
             }
         }
-       
+
         if (Object.keys(errors).length > 0) {
             return res.status(400).json(errors)
         }
@@ -279,7 +281,7 @@ const  UpdatePersonalInformation = async (req, res) => {
             firstname,
             lastname,
             phonenumber,
-            dateofbirth : birthday,
+            dateofbirth: birthday,
             maritalstatus,
             gender,
             country,
@@ -288,7 +290,7 @@ const  UpdatePersonalInformation = async (req, res) => {
             postalcode
         }, { new: true })
 
-        if (updateduser){
+        if (updateduser) {
             const token = jwt.sign(
                 {
                     _id: updateduser._id,
@@ -314,22 +316,22 @@ const  UpdatePersonalInformation = async (req, res) => {
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
             );
-            return res.status(200).json({ message: 'Successfully Updated', token: "Bearer " + token , user: updateduser })
-        } 
+            return res.status(200).json({ message: 'Successfully Updated', token: "Bearer " + token, user: updateduser })
+        }
 
 
     }
 
 
-    catch(err){
-       return  res.status(500).json({ message: err.message })
+    catch (err) {
+        return res.status(500).json({ message: err.message })
     }
 }
 
 
 const UpdatePassword = async (req, res) => {
-    try{
-        
+    try {
+
         const oldPassword = req.body.oldPassword;
         const newPassword = req.body.newPassword;
         const comparePassword = await bcrypt.compare(oldPassword, req.user.password);
@@ -338,24 +340,88 @@ const UpdatePassword = async (req, res) => {
         }
         const hashed = await bcrypt.hashSync(newPassword, 10);
         const updateduser = await Users.findByIdAndUpdate(req.user._id, { password: hashed }, { new: true });
-        if (updateduser){
+        if (updateduser) {
             return res.status(200).json({ message: 'Password Successfully Updated' })
         }
-        else{
+        else {
             return res.status(500).json({ message: 'Error' })
-        
+
         }
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({ message: error.message })
     }
 }
 
-const UpdateProfilePicture = (req, res) => {
-    uploadImage(req.body.image)
-      .then((url) => res.send(url))
-      .catch((err) => res.status(500).send(err));
+const UpdateProfilePicture =  (req, res) => {
+         uploadImage(req.body.image)
+        .then((url) => res.status(200).send(url))
+        .catch((err) => res.status(500).send(err));
+}
+
+const UpdateProfilePictureDecision = async (req, res) => {
+    try {
+        const choose = req.body.choose;
+        const ImageUrl = req.body.ImageUrl;
+        if (choose === 'Cancel') {
+            const parts = ImageUrl.split('/');
+
+            // Find the segment containing the public_id
+            const publicIdSegment = parts.find(part => part.startsWith('v'));
+
+            // Extract the public_id from the segment
+            const publicId = publicIdSegment.slice(1);
+           // deleteImage(publicId)
+        }
+        else if (choose==='Confirm'){
+            const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
+            if (updateduser) {
+                const token = jwt.sign(
+                    {
+                        _id: updateduser._id,
+                        firstname: updateduser.firstname,
+                        lastname: updateduser.lastname,
+                        email: updateduser.email,
+                        cin: updateduser.cin,
+                        role: updateduser.role,
+                        username: updateduser.username,
+                        phonenumber: updateduser.phonenumber,
+                        profilepicture: updateduser.profilepicture,
+                        dateofbirth: updateduser.dateofbirth,
+                        matricule: updateduser.matricule,
+                        createdAt: updateduser.createdAt,
+                        gender: updateduser.gender,
+                        maritalstatus: updateduser.maritalstatus,
+                        nationality: updateduser.nationality,
+                        adress: updateduser.adress,
+                        city: updateduser.city,
+                        country: updateduser.country,
+                        postalcode: updateduser.postalcode,
+                    },
+                    process.env.PRIVATE_KEY,
+                    { expiresIn: '10m' }
+                );
+                return res.status(200).json({
+                    message: "profile picture updated ",
+                    token: "Bearer " + token,
+                    
+                });
+            }
+            else {
+                return res.status(500).json({ message: 'Error' })
+            }
+        }
+
     }
+
+
+    catch (error) {
+        return res.status(500).json({ message: error.message })
+
+    }
+}
+
+
 
 
 
@@ -372,22 +438,22 @@ const UpdateProfilePicture = (req, res) => {
 const ForgetPassword = async (req, res) => {
     try {
         const email = req.body.email;
-        
-        const user  = await Users.findOne({email})
+
+        const user = await Users.findOne({ email })
         if (!user) {
             return res.status(400).json({ message: 'Email not found' })
         }
         const findToken = await ForgetPasswordToken.findOne({ userId: user._id });
-        if (findToken){
+        if (findToken) {
             return res.status(400).json({ message: 'you attempt to send otp in the last 5 minutes , please try again later' })
-            
-        } 
-         const result = await SendOtp(user)
-        return res.status(200).json({ message: 'Otp sent to your email' , token : result.id , expiredAt : result.expiredAt})
-        
-       
-       
-    
+
+        }
+        const result = await SendOtp(user)
+        return res.status(200).json({ message: 'Otp sent to your email', token: result.id, expiredAt: result.expiredAt })
+
+
+
+
     }
     catch (error) {
         return res.status(500).json({ message: error.message });
@@ -398,7 +464,7 @@ const ForgetPassword = async (req, res) => {
 
 const VerifyTokenResetPasswordExist = async (req, res) => {
     try {
-        const {  tokenid } = req.body;
+        const { tokenid } = req.body;
         const findToken = await ForgetPasswordToken.findById(tokenid);
         if (!findToken) {
             return res.status(400).json({ message: 'Invalid token' })
@@ -409,8 +475,8 @@ const VerifyTokenResetPasswordExist = async (req, res) => {
     catch (error) {
         return res.status(500).json({ message: error.message });
     }
-} 
-        
+}
+
 const VerifyOtp = async (req, res) => {
     const { email, token } = req.body;
     console.log(email, token)
@@ -444,18 +510,18 @@ const VerifyOtp = async (req, res) => {
 const ChangePassword = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await Users.findOne({email})
+        const user = await Users.findOne({ email })
         if (!user) {
             return res.status(400).json({ message: 'Email not found' })
         }
         const hashed = await bcrypt.hashSync(password, 10);
         const updateduser = await Users.findOneAndUpdate({ email }, { password: hashed }, { new: true });
-        if (updateduser){
+        if (updateduser) {
             return res.status(200).json({ message: 'Password Successfully Updated' })
         }
-        else{
+        else {
             return res.status(500).json({ message: 'Error' })
-        
+
         }
     }
     catch (error) {
@@ -466,7 +532,7 @@ const ChangePassword = async (req, res) => {
 
 
 
-  
+
 
 
 
@@ -476,13 +542,14 @@ module.exports = {
     VerifyEmail,
     EmailExist,
     VerifyCin,
-    Verifyphone ,
+    Verifyphone,
     Register,
     Login,
     ConfirmMail,
     UpdatePersonalInformation,
     UpdatePassword,
     UpdateProfilePicture,
+    UpdateProfilePictureDecision,
     ForgetPassword,
     VerifyTokenResetPasswordExist,
     VerifyOtp,

@@ -1,4 +1,4 @@
-import {v2 as cloudinary} from 'cloudinary';
+const cloudinary = require('cloudinary').v2;
           
 cloudinary.config({ 
   cloud_name: process.env.CLOUD_NAME, 
@@ -13,8 +13,7 @@ const opts = {
   };
 
   
-
-  const UploadImage = (image) => {
+  const uploadImage = (image) => {
     //imgage = > base64
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload(image, opts, (error, result) => {
@@ -27,3 +26,19 @@ const opts = {
       });
     });
   };
+
+ /* const deleteImage = (public_id) => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(public_id, (error, result) => {
+            if (result && result.result === 'ok') {
+                console.log('Image deleted successfully:', result);
+                resolve(result);
+            } else {
+                console.error('Error deleting image:', error);
+                reject(error);
+            }
+        });
+    });
+};*/
+
+  module.exports  = uploadImage;

@@ -10,6 +10,7 @@ const { VerifyEmail ,
         UpdatePersonalInformation ,
         UpdatePassword,
         UpdateProfilePicture,
+        UpdateProfilePictureDecision,
         ForgetPassword,
         VerifyTokenResetPasswordExist,
         VerifyOtp,
@@ -33,7 +34,8 @@ router.post('/login', Login)
 router.post('/refreshToken' , RefreshToken)
 router.put('/update/personalinformation',passport.authenticate('jwt' , {session : false}), UpdatePersonalInformation)
 router.put('/update/password',passport.authenticate('jwt' , {session : false}), UpdatePassword)
-router.put('/update/profilepicture',passport.authenticate('jwt' , {session : false}), UpdateProfilePicture)
+router.put('/update/profilepicture', passport.authenticate('jwt' , {session : false}),UpdateProfilePicture)
+router.post('/updateprofilepicture/decison',passport.authenticate('jwt' , {session : false}), UpdateProfilePictureDecision)
 
 
 
