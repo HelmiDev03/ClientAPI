@@ -8,8 +8,7 @@ const SendVerificationMail = require('../Emails/registerverification/sendverific
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const { emailPattern, namePattern, phonePattern } = require('..//pattern')
 const  uploadImage = require('../mediaUpload/uploadmediaconfig')
-//const deleteImage = require('../mediaUpload/mediaconfig');
-
+const deleteImage = require('../mediaUpload/deletemediaconfig')
 
 
 
@@ -356,22 +355,18 @@ const UpdatePassword = async (req, res) => {
 const UpdateProfilePicture =  (req, res) => {
          uploadImage(req.body.image)
         .then((url) => res.status(200).send(url))
-        .catch((err) => res.status(500).send(err));
+        .catch((err) => res.status(400).send(err));
 }
 
 const UpdateProfilePictureDecision = async (req, res) => {
     try {
+      
         const choose = req.body.choose;
         const ImageUrl = req.body.ImageUrl;
+        const publicId = req.body.publicId;
         if (choose === 'Cancel') {
-            const parts = ImageUrl.split('/');
-
-            // Find the segment containing the public_id
-            const publicIdSegment = parts.find(part => part.startsWith('v'));
-
-            // Extract the public_id from the segment
-            const publicId = publicIdSegment.slice(1);
-           // deleteImage(publicId)
+            deleteImage(publicId)
+            return res.status(400).json({ message: 'Image deleted' })
         }
         else if (choose==='Confirm'){
             const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
@@ -407,6 +402,10 @@ const UpdateProfilePictureDecision = async (req, res) => {
                     
                 });
             }
+
+
+
+
             else {
                 return res.status(500).json({ message: 'Error' })
             }
