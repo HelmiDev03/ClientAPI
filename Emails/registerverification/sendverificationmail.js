@@ -22,7 +22,7 @@ const SendVerificationMail = async (user) => {
         }
 
         const tokenToUse = existingToken ? existingToken.token : newToken.token;
-        const verificationUrl = `http://localhost:3000/8f4b5e36d2a1c9f7b3e0d8c2a9f1e3c7/pack?userId=${user._id}&token=${tokenToUse}`;
+        const verificationUrl = `http://localhost:3000/emailverified?userId=${user._id}&token=${tokenToUse}`;
 
         const htmlContent = fs.readFileSync(htmlFilePath, 'utf8');
         

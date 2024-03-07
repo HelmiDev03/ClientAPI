@@ -38,8 +38,12 @@ var indexRouter = require('./routes/index');
 app.use('/api', indexRouter);
 
 
+var employeesRouter = require('./routes/employees');
+app.use('/api/employees', employeesRouter);
 
 
+var companyRouter = require('./routes/company');
+app.use('/api/company', companyRouter);
 
 
 app.listen(process.env.PORT, () => {

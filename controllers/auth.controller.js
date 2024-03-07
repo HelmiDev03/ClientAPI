@@ -164,6 +164,7 @@ const Login = async (req, res) => {
 
             return res.status(400).json({ message: "Please Check Your MailBox To Verify your email" });
         }
+        const company = await Companies.findById(findUser.company)
 
 
         const token = jwt.sign(
@@ -188,6 +189,7 @@ const Login = async (req, res) => {
                 city: findUser.city,
                 country: findUser.country,
                 postalcode: findUser.postalcode,
+                company : findUser.company
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -206,6 +208,7 @@ const Login = async (req, res) => {
             message: "Success",
             token: "Bearer " + token,
             refreshToken: "Bearer " + refreshToken,
+            company : company
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -240,7 +243,7 @@ const ConfirmMail = async (req, res) => {
 
         await Users.findByIdAndUpdate(req.params.Userid, { isVerified: true });
 
-        await VerificationToken.findOneAndDelete({ userId: req.params.id });
+        await VerificationToken.findOneAndDelete({ userId: req.params.Userid });
         return res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -311,6 +314,7 @@ const UpdatePersonalInformation = async (req, res) => {
                     city: updateduser.city,
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
+                    company : updateduser.company
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
@@ -326,6 +330,10 @@ const UpdatePersonalInformation = async (req, res) => {
         return res.status(500).json({ message: err.message })
     }
 }
+
+
+
+
 
 
 const UpdatePassword = async (req, res) => {
@@ -392,6 +400,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         city: updateduser.city,
                         country: updateduser.country,
                         postalcode: updateduser.postalcode,
+                        company : updateduser.company
                     },
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
