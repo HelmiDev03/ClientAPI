@@ -10,6 +10,7 @@ const opts = {
     overwrite: true,
     invalidate: true,
     resource_type: "auto",
+    maxFileSize: 1048576, // Sets the maximum allowed file size for uploads (1 MB in bytes)
   };
 
 

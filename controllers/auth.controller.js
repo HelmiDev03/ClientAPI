@@ -92,6 +92,25 @@ const Verifyphone = async (req, res) => {
     }
 }
 
+const VerifyUserPhone = async (req, res) => {
+    try {
+            
+            const finduser = await Users.findOne({ phonenumber: req.body.phonenumber   });
+            if (finduser) {
+                return res.status(400).json({ message: 'Phone number is already used by other user' })
+
+            }
+            else {
+                return res.status(200).json({ message: 'Phone number is available' })
+            }
+    }
+    catch (err) {
+        return res.status(500).json({ message: err.message })
+    }
+}
+
+
+
 const Register = async (req, res) => {
 
     try {
@@ -186,6 +205,7 @@ const Login = async (req, res) => {
                 maritalstatus: findUser.maritalstatus,
                 nationality: findUser.nationality,
                 adress: findUser.adress,
+                
                 city: findUser.city,
                 country: findUser.country,
                 postalcode: findUser.postalcode,
@@ -551,6 +571,7 @@ module.exports = {
     EmailExist,
     VerifyCin,
     Verifyphone,
+    VerifyUserPhone,
     Register,
     Login,
     ConfirmMail,

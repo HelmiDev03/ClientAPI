@@ -6,6 +6,7 @@ const opts = require('./cloudinaryconfig');
     //imgage = > base64
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload(image, opts, (error, result) => {
+     
         if (result && result.secure_url) {
         
           return resolve(result.secure_url);

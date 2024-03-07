@@ -4,6 +4,7 @@ const { inRole  } = require('../apiprotection/Rolemiddleware');
 const { VerifyEmail ,
         VerifyCin,
         Verifyphone , 
+        VerifyUserPhone,
         Register , 
         ConfirmMail,
         Login , 
@@ -28,6 +29,7 @@ router.post('/verifyemail', VerifyEmail )
 
 router.post('/verifycin', VerifyCin )
 router.post('/verifyphone', Verifyphone )
+router.post('/verifyuserphone', VerifyUserPhone )
 router.post('/register', Register)
 router.get('/confirm-email/:Userid/:token' , ConfirmMail)
 router.post('/login', Login)

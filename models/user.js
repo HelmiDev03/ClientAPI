@@ -27,7 +27,7 @@ const UserSchema = new Schema({
   gender: { type: String, required: false },
   maritalstatus : { type: String, required: false , default: 'single'},
 
-  address: { type: String, required: false },
+  adress: { type: String, required: false },
   city: { type: String, required: false },
   country: { type: String, default: 'tunisia'},
   postalcode: { type: String, required: false },
