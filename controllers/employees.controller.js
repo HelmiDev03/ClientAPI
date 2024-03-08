@@ -2,6 +2,7 @@ const Users = require('../models/user');
 const Companies = require('../models/company');
 const bcrypt = require('bcryptjs')
 const  uploadImage = require('../mediaUpload/uploadmediaconfig')
+const deleteImage = require('../mediaUpload/deletemediaconfig')
 const GetAllEmployees = async (req, res) => {
     try{
         const employees = await Users.find({company: req.user.company});
@@ -67,6 +68,22 @@ try{
   }
 
 
+}
+
+
+const GetEmployee = async (req, res) => {
+    try{
+        const employee = await Users.findOne({_id: req.params.id});
+        if(employee){
+            employee.password = undefined;
+            return res.status(200).json({employee});
+        }
+        return res.status(404).json({message: 'Employee not found'});
+    }
+    catch(err){
+        return res.status(500).json({message: err.message});
+    }
+}
 
 
 
@@ -78,6 +95,27 @@ try{
 
 
 
+
+
+
+
+
+
+
+
+const DeleteEmployee = async (req, res) => {
+    try{
+        const employee = await Users.findOne({_id: req.params.id});
+        if(employee){
+            await Users.deleteOne({_id: req.params.id});
+             deleteImage(req.params.publicId);
+            return res.status(200).json({message: 'Employee deleted successfully'});
+        }
+        return res.status(404).json({message: 'Employee not found'});
+    }
+    catch(err){
+        return res.status(500).json({message: err.message});
+    }
 }
 
 
@@ -116,4 +154,6 @@ try{
 module.exports = {
     GetAllEmployees,
     AddNewEmployee,
+    GetEmployee,
+    DeleteEmployee,
 }

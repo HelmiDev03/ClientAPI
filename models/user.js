@@ -18,7 +18,6 @@ const UserSchema = new Schema({
   //permisiion taw baed
 
   password: { type: String, required: false },
-  username : { type: String, required: false , unique: true},
   phonenumber: { type: String, required: false , unique: true},
   profilepicture: { type: String, required: false },
   dateofbirth: { type: Date, required: false },
