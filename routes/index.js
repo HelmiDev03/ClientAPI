@@ -15,7 +15,10 @@ const { VerifyEmail ,
         ForgetPassword,
         VerifyTokenResetPasswordExist,
         VerifyOtp,
-        ChangePassword } = require('../controllers/auth.controller');
+        ChangePassword,
+        SendTfaOtp,
+        VerifytfaOtp,
+        UpdateTfa } = require('../controllers/auth.controller');
 const { RefreshToken } = require('../controllers/refreshtoken.controller');
 const passport = require('passport');
 
@@ -43,12 +46,17 @@ router.post('/updateprofilepicture/decison',passport.authenticate('jwt' , {sessi
 
 
 
-
+//forget password
 router.post('/forgetpassword/verifytokenixist', VerifyTokenResetPasswordExist)
 router.post('/forgetpassword/sendotp', ForgetPassword)
 router.post('/forgetpassword/verifyotp', VerifyOtp)
 router.post('/forgetpassword/changepassword', ChangePassword)
 
+
+//tfa
+router.post('/tfa/sendotp',passport.authenticate('jwt' , {session : false}), SendTfaOtp)
+router.post('/tfa/verifyotp',passport.authenticate('jwt' , {session : false}), VerifytfaOtp)
+router.put('/tfa/disable',passport.authenticate('jwt' , {session : false}), UpdateTfa)
 
 
 

@@ -43,6 +43,8 @@ const RefreshToken = async (req, res) => {
                 city: findUser.city,
                 country: findUser.country,
                 postalcode: findUser.postalcode,
+                tfa: findUser.tfa,
+                company : findUser.company
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -51,6 +53,7 @@ const RefreshToken = async (req, res) => {
         // Send the new token in the response
         return res.status(200).json({ token: "Bearer " + token });
     } catch (error) {
+     
         return res.status(401).json({ message: 'Invalid or expired refresh token' });
     }
 };

@@ -6,9 +6,11 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
+const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
 const { emailPattern, namePattern, phonePattern } = require('..//pattern')
 const  uploadImage = require('../mediaUpload/uploadmediaconfig')
-const deleteImage = require('../mediaUpload/deletemediaconfig')
+const deleteImage = require('../mediaUpload/deletemediaconfig');
+const TfaToken = require('../models/tfaverification/tfatoken');
 
 
 
@@ -209,6 +211,7 @@ const Login = async (req, res) => {
                 city: findUser.city,
                 country: findUser.country,
                 postalcode: findUser.postalcode,
+                tfa: findUser.tfa,
                 company : findUser.company
             },
             process.env.PRIVATE_KEY,
@@ -334,6 +337,7 @@ const UpdatePersonalInformation = async (req, res) => {
                     city: updateduser.city,
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
+                    tfa : updateduser.tfa,
                     company : updateduser.company
                 },
                 process.env.PRIVATE_KEY,
@@ -420,6 +424,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         city: updateduser.city,
                         country: updateduser.country,
                         postalcode: updateduser.postalcode,
+                        tfa : updateduser.tfa,
                         company : updateduser.company
                     },
                     process.env.PRIVATE_KEY,
@@ -566,6 +571,129 @@ const ChangePassword = async (req, res) => {
 
 
 
+const SendTfaOtp = async (req,res)=>{
+    try {
+       
+        const findToken = await TfaToken.findOne({ userId: req.user._id });
+        if (findToken) {
+            return res.status(400).json({ message: 'you attempt to send otp in the last 5 minutes , please try again later' })
+
+        }
+        const result = await SendTFAOtp(req.user)
+        return res.status(200).json({ message: 'Otp sent to your email', token: result.id, expiredAt: result.expiredAt })
+
+
+
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+const VerifytfaOtp = async (req, res) => {
+    const { token } = req.body;
+    try {
+        const findToken = await TfaToken.findOne({ userId: req.user._id });
+        if (!findToken) {
+            return res.status(400).json({ message: 'Otp not found' })
+        }
+        if (findToken.token !== token) {
+            return res.status(400).json({ message: 'Invalid Otp' })
+        }
+        if (findToken.expiresIn < Date.now()) {
+            return res.status(400).json({ message: 'Otp expired' })
+        }   
+        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: true } , { new: true });
+        if (updateduser) {
+            const token = jwt.sign(
+                {
+                    _id: updateduser._id,
+                    firstname: updateduser.firstname,
+                    lastname: updateduser.lastname,
+                    email: updateduser.email,
+                    cin: updateduser.cin,
+                    role: updateduser.role,
+                    username: updateduser.username,
+                    phonenumber: updateduser.phonenumber,
+                    profilepicture: updateduser.profilepicture,
+                    dateofbirth: updateduser.dateofbirth,
+                    matricule: updateduser.matricule,
+                    createdAt: updateduser.createdAt,
+                    gender: updateduser.gender,
+                    maritalstatus: updateduser.maritalstatus,
+                    nationality: updateduser.nationality,
+                    adress: updateduser.adress,
+                    city: updateduser.city,
+                    country: updateduser.country,
+                    postalcode: updateduser.postalcode,
+                    tfa : updateduser.tfa,
+                    company : updateduser.company
+                },
+                process.env.PRIVATE_KEY,
+                { expiresIn: '10m' }
+            );
+            return res.status(200).json({token: "Bearer " + token, message: 'TFA Enabled Successfully' })
+        }
+       
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+
+}
+
+
+const  UpdateTfa = async (req, res) => {
+    try {
+        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: false} , { new: true });
+        if (updateduser) {
+            const token = jwt.sign(
+                {
+                    _id: updateduser._id,
+                    firstname: updateduser.firstname,
+                    lastname: updateduser.lastname,
+                    email: updateduser.email,
+                    cin: updateduser.cin,
+                    role: updateduser.role,
+                    username: updateduser.username,
+                    phonenumber: updateduser.phonenumber,
+                    profilepicture: updateduser.profilepicture,
+                    dateofbirth: updateduser.dateofbirth,
+                    matricule: updateduser.matricule,
+                    createdAt: updateduser.createdAt,
+                    gender: updateduser.gender,
+                    maritalstatus: updateduser.maritalstatus,
+                    nationality: updateduser.nationality,
+                    adress: updateduser.adress,
+                    city: updateduser.city,
+                    country: updateduser.country,
+                    postalcode: updateduser.postalcode,
+                    tfa : updateduser.tfa,
+                    company : updateduser.company
+                },
+                process.env.PRIVATE_KEY,
+                { expiresIn: '10m' }
+            );
+            return res.status(200).json({
+                message: "tfa disbaled ",
+                token: "Bearer " + token,
+                
+            });
+        }
+        
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
 module.exports = {
     VerifyEmail,
     EmailExist,
@@ -583,4 +711,7 @@ module.exports = {
     VerifyTokenResetPasswordExist,
     VerifyOtp,
     ChangePassword,
+    SendTfaOtp,
+    VerifytfaOtp,
+    UpdateTfa,
 }

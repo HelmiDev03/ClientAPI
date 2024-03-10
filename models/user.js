@@ -32,6 +32,10 @@ const UserSchema = new Schema({
   postalcode: { type: String, required: false },
 
 
+  //tfa
+  tfa: { type: Boolean, required: false , default: false},
+
+
   //hedhom lezem kinged fazt google
   googleid: { type: String, required: false ,unique: true},
   secret: { type: String, required: false , unique: true},

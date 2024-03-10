@@ -24,7 +24,8 @@ const GetAllEmployees = async (req, res) => {
 const AddNewEmployee = async (req, res) => {
 
 try{
-    const data = {
+  
+    const {
             firstname,
             lastname,
             phonenumber,
@@ -38,8 +39,10 @@ try{
         } = req.body;
         
         const url = await uploadImage(profilepicture);
+        
 
         const hashed = await bcrypt.hashSync(password, 10);
+        
         const user = new Users({
             firstname,
             lastname,
@@ -107,8 +110,9 @@ const DeleteEmployee = async (req, res) => {
     try{
         const employee = await Users.findOne({_id: req.params.id});
         if(employee){
-            await Users.deleteOne({_id: req.params.id});
-             deleteImage(req.params.publicId);
+             await Users.deleteOne({_id: req.params.id});
+             if (employee.profilepicture !="" && employee.profilepicture != null && employee.profilepicture != undefined)
+                       deleteImage(req.params.publicId);
             return res.status(200).json({message: 'Employee deleted successfully'});
         }
         return res.status(404).json({message: 'Employee not found'});
