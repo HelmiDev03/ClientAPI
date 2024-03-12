@@ -14,7 +14,7 @@ const CompanySchema = new Schema({
     phonenumber : { type: String, required: true },
     
     anniversaire : { type: Date, required: false },
-    adresse : { type: String, required: false },
+    adress : { type: String, required: false },
     city : { type: String, required: false },
     zip : { type: String, required: false },
     country : { type: String, required: false },
