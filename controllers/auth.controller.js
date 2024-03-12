@@ -181,7 +181,7 @@ const Login = async (req, res) => {
         }
 
         if (!findUser.isVerified) {
-            SendVerificationMail(findUser);
+            
 
             return res.status(400).json({ message: "Please Check Your MailBox To Verify your email" });
         }
