@@ -45,6 +45,9 @@ app.use('/api/employees', employeesRouter);
 var companyRouter = require('./routes/company');
 app.use('/api/company', companyRouter);
 
+var timeoffRouter = require('./routes/timeoff');
+app.use('/api/policy', timeoffRouter);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);

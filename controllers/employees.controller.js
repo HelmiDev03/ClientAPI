@@ -3,6 +3,10 @@ const Companies = require('../models/company');
 const bcrypt = require('bcryptjs')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig')
+const Policies = require('../models/policy');
+
+
+
 const GetAllEmployees = async (req, res) => {
     try {
         const employees = await Users.find({ company: req.user.company });
@@ -24,6 +28,7 @@ const GetAllEmployees = async (req, res) => {
 const AddNewEmployee = async (req, res) => {
     console.log(req.body);
     try {
+        const policy = await Policies.findOne({ isdefault: true, company: req.user.company });
         let user = {}
 
         const {
@@ -36,7 +41,8 @@ const AddNewEmployee = async (req, res) => {
             role,
             email,
             password,
-            profilepicture
+            profilepicture,
+            
         } = req.body;
        
         const hashed = await bcrypt.hashSync(password, 10);
@@ -60,7 +66,8 @@ const AddNewEmployee = async (req, res) => {
                 password: hashed,
                 profilepicture: url,
                 company: req.user.company,
-                isVerified: true
+                isVerified: true,
+                policy : policy._id
             });
             await user.save();
         }
@@ -76,7 +83,8 @@ const AddNewEmployee = async (req, res) => {
                 email,
                 password: hashed,
                 company: req.user.company,
-                isVerified: true
+                isVerified: true,
+                policy : policy._id
             });
             await user.save();
         }

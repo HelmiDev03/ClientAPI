@@ -43,6 +43,7 @@ const UserSchema = new Schema({
 
 
   company : { type: Schema.Types.ObjectId, ref: 'companie' },
+  policy : { type: Schema.Types.ObjectId, ref: 'policy' },
 
 },
   {

@@ -108,6 +108,46 @@ const UpdateCompanyPackage = async (req, res) => {
 
 
 
+const UpdateNationalDays = async (req, res) => {
+
+    try {
+        const {day,name} = req.body;
+        let company = await Companies.findOne({ _id: req.user.company });
+        if (!company) {
+            return res.status(404).json({ message: "Company not found" });
+        }
+         company = await Companies.findOneAndUpdate({ _id: req.user.company }, {
+            $push: { nationaldays: { day, name } }
+        }, { new: true });
+        return res.status(200).json({ message: "National day added" , company : company});
+    }
+   catch (error) {
+      
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+const DeleteNationalDays = async (req, res) => {
+    try {
+        const {index} = req.body;
+        let company = await Companies.findOne({ _id: req.user.company });
+        if (!company) {
+            return res.status(404).json({ message: "Company not found" });
+        }
+        //remove the element with index=index from nationaldays array
+        company.nationaldays.splice(index, 1);
+        await company.save();
+        return res.status(200).json({ message: "National day deleted" , company : company});
+        
+    }
+   catch (error) {
+      
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+
+
 
 
 
@@ -118,5 +158,7 @@ const UpdateCompanyPackage = async (req, res) => {
 module.exports = {
      GetCompanyData,
      UpdateCompany,
-     UpdateCompanyPackage
+     UpdateCompanyPackage,
+     UpdateNationalDays,
+     DeleteNationalDays
  }

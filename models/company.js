@@ -19,6 +19,7 @@ const CompanySchema = new Schema({
     zip : { type: String, required: false },
     country : { type: String, required: false },
     package : { type: String, required: false },
+    nationaldays : { type: Array, required: false },
 
 },
   {

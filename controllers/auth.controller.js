@@ -8,9 +8,10 @@ const SendVerificationMail = require('../Emails/registerverification/sendverific
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
 const { emailPattern, namePattern, phonePattern } = require('..//pattern')
-const  uploadImage = require('../mediaUpload/uploadmediaconfig')
+const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
 const TfaToken = require('../models/tfaverification/tfatoken');
+const Policies = require('../models/policy');
 
 
 
@@ -96,15 +97,15 @@ const Verifyphone = async (req, res) => {
 
 const VerifyUserPhone = async (req, res) => {
     try {
-            
-            const finduser = await Users.findOne({ phonenumber: req.body.phonenumber   });
-            if (finduser) {
-                return res.status(400).json({ message: 'Phone number is already used by other user' })
 
-            }
-            else {
-                return res.status(200).json({ message: 'Phone number is available' })
-            }
+        const finduser = await Users.findOne({ phonenumber: req.body.phonenumber });
+        if (finduser) {
+            return res.status(400).json({ message: 'Phone number is already used by other user' })
+
+        }
+        else {
+            return res.status(200).json({ message: 'Phone number is available' })
+        }
     }
     catch (err) {
         return res.status(500).json({ message: err.message })
@@ -142,6 +143,24 @@ const Register = async (req, res) => {
         await user.save()
         user.password = undefined
         SendVerificationMail(user)
+        const policy = await Policies.create({
+            name: 'Default',
+            description: 'Default policy',
+            isdefault: true,
+            absences: ['Holidays', 'Sick leave', 'Compassionate leave', 'Parental leave'],
+            startMonth: 'January',
+            duration: '12 months',
+            workingDays: 22,
+            TimeOffDaysPerWorkingDays: 2,
+            MaxTimeOffDays: 7,
+            nationaldays: true,
+            timeofflastforever: true,
+            company: company._id
+        })
+        await policy.save()
+        // update user with policy
+        await Users.findByIdAndUpdate(user._id, { policy: policy._id } , { new: true })
+        
         return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
 
@@ -181,7 +200,7 @@ const Login = async (req, res) => {
         }
 
         if (!findUser.isVerified) {
-            
+
 
             return res.status(400).json({ message: "Please Check Your MailBox To Verify your email" });
         }
@@ -207,12 +226,12 @@ const Login = async (req, res) => {
                 maritalstatus: findUser.maritalstatus,
                 nationality: findUser.nationality,
                 adress: findUser.adress,
-                
+
                 city: findUser.city,
                 country: findUser.country,
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
-                company : findUser.company
+                company: findUser.company
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -231,7 +250,7 @@ const Login = async (req, res) => {
             message: "Success",
             token: "Bearer " + token,
             refreshToken: "Bearer " + refreshToken,
-            company : company
+            company: company
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -337,8 +356,8 @@ const UpdatePersonalInformation = async (req, res) => {
                     city: updateduser.city,
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
-                    tfa : updateduser.tfa,
-                    company : updateduser.company
+                    tfa: updateduser.tfa,
+                    company: updateduser.company
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
@@ -384,15 +403,15 @@ const UpdatePassword = async (req, res) => {
     }
 }
 
-const UpdateProfilePicture =  (req, res) => {
-         uploadImage(req.body.image)
+const UpdateProfilePicture = (req, res) => {
+    uploadImage(req.body.image)
         .then((url) => res.status(200).send(url))
         .catch((err) => res.status(400).send(err));
 }
 
 const UpdateProfilePictureDecision = async (req, res) => {
     try {
-      
+
         const choose = req.body.choose;
         const ImageUrl = req.body.ImageUrl;
         const publicId = req.body.publicId;
@@ -400,7 +419,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
             deleteImage(publicId)
             return res.status(400).json({ message: 'Image deleted' })
         }
-        else if (choose==='Confirm'){
+        else if (choose === 'Confirm') {
             const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
             if (updateduser) {
                 const token = jwt.sign(
@@ -424,8 +443,8 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         city: updateduser.city,
                         country: updateduser.country,
                         postalcode: updateduser.postalcode,
-                        tfa : updateduser.tfa,
-                        company : updateduser.company
+                        tfa: updateduser.tfa,
+                        company: updateduser.company
                     },
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
@@ -433,7 +452,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
                 return res.status(200).json({
                     message: "profile picture updated ",
                     token: "Bearer " + token,
-                    
+
                 });
             }
 
@@ -571,9 +590,9 @@ const ChangePassword = async (req, res) => {
 
 
 
-const SendTfaOtp = async (req,res)=>{
+const SendTfaOtp = async (req, res) => {
     try {
-       
+
         const findToken = await TfaToken.findOne({ userId: req.user._id });
         if (findToken) {
             return res.status(400).json({ message: 'you attempt to send otp in the last 5 minutes , please try again later' })
@@ -604,8 +623,8 @@ const VerifytfaOtp = async (req, res) => {
         }
         if (findToken.expiresIn < Date.now()) {
             return res.status(400).json({ message: 'Otp expired' })
-        }   
-        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: true } , { new: true });
+        }
+        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: true }, { new: true });
         if (updateduser) {
             const token = jwt.sign(
                 {
@@ -628,15 +647,15 @@ const VerifytfaOtp = async (req, res) => {
                     city: updateduser.city,
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
-                    tfa : updateduser.tfa,
-                    company : updateduser.company
+                    tfa: updateduser.tfa,
+                    company: updateduser.company
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
             );
-            return res.status(200).json({token: "Bearer " + token, message: 'TFA Enabled Successfully' })
+            return res.status(200).json({ token: "Bearer " + token, message: 'TFA Enabled Successfully' })
         }
-       
+
     }
     catch (error) {
         return res.status(500).json({ message: error.message });
@@ -645,9 +664,9 @@ const VerifytfaOtp = async (req, res) => {
 }
 
 
-const  UpdateTfa = async (req, res) => {
+const UpdateTfa = async (req, res) => {
     try {
-        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: false} , { new: true });
+        const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: false }, { new: true });
         if (updateduser) {
             const token = jwt.sign(
                 {
@@ -670,8 +689,8 @@ const  UpdateTfa = async (req, res) => {
                     city: updateduser.city,
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
-                    tfa : updateduser.tfa,
-                    company : updateduser.company
+                    tfa: updateduser.tfa,
+                    company: updateduser.company
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
@@ -679,10 +698,10 @@ const  UpdateTfa = async (req, res) => {
             return res.status(200).json({
                 message: "tfa disbaled ",
                 token: "Bearer " + token,
-                
+
             });
         }
-        
+
     }
     catch (error) {
         return res.status(500).json({ message: error.message });
