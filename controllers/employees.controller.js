@@ -88,8 +88,20 @@ const AddNewEmployee = async (req, res) => {
             });
             await user.save();
         }
+        let policies = await Policies.find({ company: req.user.company });
 
-        return res.status(201).json({ message: 'Employee added successfully' });
+        let policiesWithUsers = [];
+
+
+        await Promise.all(policies.map(async (policy) => {
+
+            const employees = await Users.find({ policy: policy._id });
+            const policyWithUsers = { ...policy.toObject(), employees };
+            policiesWithUsers.push(policyWithUsers);
+        }));
+     
+
+        return res.status(201).json({ message: 'Employee added successfully'  ,  policies: policiesWithUsers});
 
     }
 
@@ -143,11 +155,22 @@ const DeleteEmployee = async (req, res) => {
         const employee = await Users.findOne({ _id: req.params.id });
         console.log(employee)
         if (employee) {
-            await Users.deleteOne({ _id: req.params.id });
+             await Users.deleteOne({ _id: req.params.id });
+
             if (req.params.publicId!="error")
                        deleteImage(req.params.publicId)
-      
-            return res.status(200).json({ message: 'Employee deleted successfully' });
+                       let policies = await Policies.find({ company: req.user.company });
+
+                       let policiesWithUsers = [];
+               
+               
+                       await Promise.all(policies.map(async (policy) => {
+               
+                           const employees = await Users.find({ policy: policy._id });
+                           const policyWithUsers = { ...policy.toObject(), employees };
+                           policiesWithUsers.push(policyWithUsers);
+                       }));
+            return res.status(200).json({ message: 'Employee deleted successfully' , policies: policiesWithUsers });
         }
         return res.status(404).json({ message: 'Employee not found' });
     }

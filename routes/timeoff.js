@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { GetPolicies} = require('../controllers/timeoff.controller');
+const { GetPolicies, GetPolicy, CreatePolicy , UpdatePolicy , UpdateEmployeePolicy  } = require('../controllers/timeoff.controller');
 
 
 
 
 router.get('/', passport.authenticate('jwt' , {session : false}), GetPolicies ) 
-
-
+router.get('/get/:id', passport.authenticate('jwt' , {session : false}), GetPolicy )
+router.post('/create', passport.authenticate('jwt' , {session : false}), CreatePolicy )
+router.put('/update/:id', passport.authenticate('jwt' , {session : false}), UpdatePolicy )
+router.put('/updateemployeepolicy/:id', passport.authenticate('jwt' , {session : false}), UpdateEmployeePolicy )
 
 
 
