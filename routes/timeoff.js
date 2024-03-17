@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { GetPolicies, GetPolicy, CreatePolicy , UpdatePolicy , UpdateEmployeePolicy  } = require('../controllers/timeoff.controller');
+const { GetPolicies, GetPolicy, CreatePolicy , UpdatePolicy , UpdateEmployeePolicy,AddNewEmployeesToPolicy  } = require('../controllers/timeoff.controller');
 
 
 
@@ -11,7 +11,7 @@ router.get('/get/:id', passport.authenticate('jwt' , {session : false}), GetPoli
 router.post('/create', passport.authenticate('jwt' , {session : false}), CreatePolicy )
 router.put('/update/:id', passport.authenticate('jwt' , {session : false}), UpdatePolicy )
 router.put('/updateemployeepolicy/:id', passport.authenticate('jwt' , {session : false}), UpdateEmployeePolicy )
-
+router.put('/addemployeestopolicy/:id', passport.authenticate('jwt' , {session : false}), AddNewEmployeesToPolicy )
 
 
 

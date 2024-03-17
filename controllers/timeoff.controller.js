@@ -151,7 +151,31 @@ const UpdateEmployeePolicy = async (req, res) => {
 }
 
 
+const AddNewEmployeesToPolicy = async (req, res) => {
+    try{
+        const policy = await Policies.findById(req.params.id);
+        const employeesId = req.body.employeesId;
+        const employees = await Users.find({ _id: { $in: employeesId } });
+        await Promise.all(employees.map(async (employee) => {
+            await Users.findByIdAndUpdate(employee._id, { policy: policy._id }, { new: true });
+        }));
+        let policies = await Policies.find({ company: req.user.company });
 
+            let policiesWithUsers = [];
+
+
+            await Promise.all(policies.map(async (policy) => {
+
+                const employees = await Users.find({ policy: policy._id });
+                const policyWithUsers = { ...policy.toObject(), employees };
+                policiesWithUsers.push(policyWithUsers);
+            }));
+        return res.status(200).json({ message: 'Employees added to policy successfully', policies: policiesWithUsers });    
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
 
 
 
@@ -182,4 +206,5 @@ module.exports = {
     CreatePolicy,
     UpdatePolicy,
     UpdateEmployeePolicy,
+    AddNewEmployeesToPolicy,
 };
