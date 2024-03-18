@@ -35,6 +35,11 @@ const UserSchema = new Schema({
   //tfa
   tfa: { type: Boolean, required: false , default: false},
 
+  //needed for time off
+  accruedDays: { type: Number, required: false , default: 0},
+  availableDays: { type: Number, required: false , default: 0},
+  usedDays: { type: Number, required: false , default: 0},
+
 
   //hedhom lezem kinged fazt google
   googleid: { type: String, required: false ,unique: true},

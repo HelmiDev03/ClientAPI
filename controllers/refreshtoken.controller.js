@@ -44,7 +44,8 @@ const RefreshToken = async (req, res) => {
                 country: findUser.country,
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
-                company : findUser.company
+                company : findUser.company,
+                policy : findUser.policy,
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }

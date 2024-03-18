@@ -231,7 +231,8 @@ const Login = async (req, res) => {
                 country: findUser.country,
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
-                company: findUser.company
+                company: findUser.company,
+                policy : findUser.policy
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -357,7 +358,8 @@ const UpdatePersonalInformation = async (req, res) => {
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
-                    company: updateduser.company
+                    company: updateduser.company,
+                    policy : updateduser.policy
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
@@ -444,7 +446,8 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         country: updateduser.country,
                         postalcode: updateduser.postalcode,
                         tfa: updateduser.tfa,
-                        company: updateduser.company
+                        company: updateduser.company,
+                        policy : updateduser.policy
                     },
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
@@ -648,7 +651,8 @@ const VerifytfaOtp = async (req, res) => {
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
-                    company: updateduser.company
+                    company: updateduser.company,
+                    policy : updateduser.policy,
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
@@ -690,7 +694,8 @@ const UpdateTfa = async (req, res) => {
                     country: updateduser.country,
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
-                    company: updateduser.company
+                    company: updateduser.company,
+                    policy: updateduser.policy
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }

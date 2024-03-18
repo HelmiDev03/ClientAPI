@@ -1,0 +1,359 @@
+
+const Policies = require('../../models/policy');
+const Users = require('../../models/user');
+
+
+
+
+
+
+
+
+
+const GetPolicies = async (req, res) => {
+    try {
+
+        let policies = await Policies.find({ company: req.user.company });
+
+        let policiesWithUsers = [];
+
+
+        await Promise.all(policies.map(async (policy) => {
+
+            const employees = await Users.find({ policy: policy._id });
+            const policyWithUsers = { ...policy.toObject(), employees };
+            policiesWithUsers.push(policyWithUsers);
+        }));
+
+        // Return the populated policies
+        return res.status(200).json({ policies: policiesWithUsers });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+const GetPolicy = async (req, res) => {
+    try {
+        let policy = await Policies.findById(req.params.id);
+        if (!policy) {
+            return res.status(404).json({ message: 'Policy not found' });
+        }
+        let Policywithuser = {}
+        if (policy) {
+            const employees = await Users.find({ policy: policy._id });
+            policy = { ...policy.toObject(), employees };
+        }
+        return res.status(200).json({ policy });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
+
+const CreatePolicy = async (req, res) => {
+    try {
+        const findPolicy = await Policies.findOne({ name: req.body.name, company: req.user.company });
+        if (findPolicy) {
+            return res.status(400).json({ name: 'Policy Name  Already Taken' });
+        }
+        const policy = new Policies({ ...req.body, company: req.user.company });
+        await policy.save();
+        let policies = await Policies.find({ company: req.user.company });
+
+        let policiesWithUsers = [];
+
+
+        await Promise.all(policies.map(async (policy) => {
+
+            const employees = await Users.find({ policy: policy._id });
+            const policyWithUsers = { ...policy.toObject(), employees };
+            policiesWithUsers.push(policyWithUsers);
+        }));
+        return res.status(200).json({ policies: policiesWithUsers });
+    } catch (error) {
+
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
+
+const UpdatePolicy = async (req, res) => {
+    try {
+        console.log(req.body);
+        const policy = await Policies.findById(req.params.id);
+        if (!policy) {
+            return res.status(404).json({ message: 'Policy not found' });
+        }
+        await Policies.findByIdAndUpdate(req.params.id, req.body);
+
+
+        let policies = await Policies.find({ company: req.user.company });
+
+        let policiesWithUsers = [];
+
+
+        await Promise.all(policies.map(async (policy) => {
+
+            const employees = await Users.find({ policy: policy._id });
+            const policyWithUsers = { ...policy.toObject(), employees };
+            policiesWithUsers.push(policyWithUsers);
+        }));
+        return res.status(200).json({ policies: policiesWithUsers, message: "Policy updated successfully" });
+
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+const UpdateEmployeePolicy = async (req, res) => {
+    try {
+        const employee = await Users.findById(req.params.id);
+        if (employee) {
+            const policy = await Policies.findOne({ name: req.body.name, company: req.user.company });
+            await Users.findByIdAndUpdate(req.params.id, { policy: policy._id }, { new: true });
+
+
+            let policies = await Policies.find({ company: req.user.company });
+
+            let policiesWithUsers = [];
+
+
+            await Promise.all(policies.map(async (policy) => {
+
+                const employees = await Users.find({ policy: policy._id });
+                const policyWithUsers = { ...policy.toObject(), employees };
+                policiesWithUsers.push(policyWithUsers);
+            }));
+            return res.status(200).json({ message: 'Employee policy updated successfully', policies: policiesWithUsers });
+        }
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+const AddNewEmployeesToPolicy = async (req, res) => {
+    try {
+        const policy = await Policies.findById(req.params.id);
+        const employeesId = req.body.employeesId;
+        const employees = await Users.find({ _id: { $in: employeesId } });
+        await Promise.all(employees.map(async (employee) => {
+            await Users.findByIdAndUpdate(employee._id, { policy: policy._id }, { new: true });
+        }));
+        let policies = await Policies.find({ company: req.user.company });
+
+        let policiesWithUsers = [];
+
+
+        await Promise.all(policies.map(async (policy) => {
+
+            const employees = await Users.find({ policy: policy._id });
+            const policyWithUsers = { ...policy.toObject(), employees };
+            policiesWithUsers.push(policyWithUsers);
+        }));
+        return res.status(200).json({ message: 'Employees added to policy successfully', policies: policiesWithUsers });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+function getMonthNumber(monthName) {
+    switch (monthName.toLowerCase()) {
+        case 'january': return 0;
+        case 'february': return 1;
+        case 'march': return 2;
+        case 'april': return 3;
+        case 'may': return 4;
+        case 'june': return 5;
+        case 'july': return 6;
+        case 'august': return 7;
+        case 'september': return 8;
+        case 'october': return 9;
+        case 'november': return 10;
+        case 'december': return 11;
+        default: throw new Error('Invalid month name: ' + monthName);
+    }
+}
+//reciproque
+function getMonthName(monthIndex) {
+    switch (monthIndex) {
+        case 0: return 'January';
+        case 1: return 'February';
+        case 2: return 'March';
+        case 3: return 'April';
+        case 4: return 'May';
+        case 5: return 'June';
+        case 6: return 'July';
+        case 7: return 'August';
+        case 8: return 'September';
+        case 9: return 'October';
+        case 10: return 'November';
+        case 11: return 'December';
+        default: throw new Error('Invalid month index: ' + monthIndex);
+    }
+}
+
+
+const CalculateTimeOffDays = async (req, res) => {
+    try {
+        const currentDate = new Date();
+        const user = req.user;
+        let policy = await Policies.findById(user.policy);
+        let accruedDays = 0;
+        if (policyHasEnded(policy)) {
+            const policyStart = calculatePolicyStartDate(policy);
+
+            console.log('policystart', policyStart)
+            console.log('userjoiin', user.createdAt)
+
+            const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
+
+            // Calculate days since the start date excluding Sundays
+            const startmonthnumber = getMonthNumber(policy.startMonth);
+            const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+            const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+            const daysSinceStartExcludingSundays = calculateDaysSinceStartExcludingSundays(userStartDate, endDate);
+            user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingSundays, policyStart);
+            await user.save();
+            policy = await updatePolicyDuration(policy);
+        }
+
+        // Calculate the start date of the current policy cycle
+        const policyStart = calculatePolicyStartDate(policy);
+        console.log('policystart', policyStart)
+        console.log('userjoiin', user.createdAt)
+        // Determine the user's start date (either user creation date or policy start date)
+        const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
+
+        // Calculate days since the start date excluding Sundays
+        const daysSinceStartExcludingSundays = calculateDaysSinceStartExcludingSundays(userStartDate, currentDate);
+        // Calculate accrued days based on the policy's settings
+        user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingSundays, policyStart);
+        await user.save();
+
+        return res.status(200).json({ daysSinceStartExcludingSundays, accruedDays: user.accruedDays });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const updatePolicyDuration = async (policy) => {
+    try {
+        console.log(policy.duration)
+        // Update policy duration as needed
+        const months = policy.startMonth;
+        const monthIndex = getMonthNumber(months);
+        const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+        //update monthstart with oldmont + duration
+        const newMonth = getMonthName(new Date().getMonth());
+
+        policy.startMonth = newMonth;
+
+
+        // Save the updated policy
+        return await policy.save();
+    } catch (error) {
+        throw new Error('Error updating policy duration: ' + error.message);
+    }
+}
+
+const policyHasEnded = (policy) => {
+    // Get the current date
+    const currentDate = new Date();
+
+    // Calculate the end date of the current policy cycle
+    const policyStart = calculatePolicyStartDate(policy);
+    const startmonthnumber = getMonthNumber(policy.startMonth);
+    const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+    const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+
+
+
+
+    console.log(policyStart)
+    console.log(endDate)
+    console.log(currentDate > endDate)
+    return currentDate > endDate;
+}
+
+
+// Function to calculate the start date of the current policy cycle
+const calculatePolicyStartDate = (policy) => {
+    const policyStartMonth = policy.startMonth;
+    const currentYear = new Date().getFullYear();
+    const monthIndex = getMonthNumber(policyStartMonth);
+    return new Date(Date.UTC(currentYear, monthIndex, 1));
+}
+
+// Function to calculate days since the start date excluding Sundays
+const calculateDaysSinceStartExcludingSundays = (startDate, endDate) => {
+    let daysSinceStartExcludingSundays = 0;
+    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+        if (date.getDay() !== 0) { // Skip Sundays (where getDay() returns 0)
+            daysSinceStartExcludingSundays++;
+        }
+    }
+    return daysSinceStartExcludingSundays;
+}
+
+// Function to calculate accrued days based on the policy's settings for all cycles
+const calculateAccruedDays = (policy, daysSinceStartExcludingSundays) => {
+    const workingDaysPerMonth = policy.workingDays;
+    const timeOffDaysPerWorkingDay = policy.TimeOffDaysPerWorkingDays;
+    let accruedDays = 0;
+    accruedDays += Math.floor(daysSinceStartExcludingSundays / workingDaysPerMonth) * timeOffDaysPerWorkingDay;
+    console.log('daysSinceStartExcludingSundays', daysSinceStartExcludingSundays)
+    console.log('accruedDays', accruedDays);
+    return accruedDays;
+}
+
+
+// Function to get the month name from the month index
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = {
+    GetPolicies,
+    GetPolicy,
+    CreatePolicy,
+    UpdatePolicy,
+    UpdateEmployeePolicy,
+    AddNewEmployeesToPolicy,
+    CalculateTimeOffDays
+};
