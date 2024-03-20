@@ -18,7 +18,8 @@ const UserSchema = new Schema({
   //permisiion taw baed
 
   password: { type: String, required: false },
-  phonenumber: { type: String, required: false , unique: true},
+  phonenumber: { type: String, required: false, sparse: true ,default:""},
+
   profilepicture: { type: String, required: false },
   dateofbirth: { type: Date, required: false },
   createdAt: { type: Date, default: Date.now },

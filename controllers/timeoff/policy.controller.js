@@ -157,7 +157,7 @@ const AddNewEmployeesToPolicy = async (req, res) => {
         const employeesId = req.body.employeesId;
         const employees = await Users.find({ _id: { $in: employeesId } });
         await Promise.all(employees.map(async (employee) => {
-            await Users.findByIdAndUpdate(employee._id, { policy: policy._id }, { new: true });
+            await Users.findByIdAndUpdate(employee._id, { policy: policy._id , accruedDays:0 }, { new: true });
         }));
         let policies = await Policies.find({ company: req.user.company });
 
@@ -232,13 +232,16 @@ const CalculateTimeOffDays = async (req, res) => {
 
             const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
 
-            // Calculate days since the start date excluding Sundays
+            // Calculate days since the start date excluding Sundays for last cycle if policy , timeofflastforever is true
+            if (policy.timeOffLastForever) {
             const startmonthnumber = getMonthNumber(policy.startMonth);
             const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
             const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
             const daysSinceStartExcludingSundays = calculateDaysSinceStartExcludingSundays(userStartDate, endDate);
             user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingSundays, policyStart);
-            await user.save();
+            accruedDays = user.accruedDays;
+            }
+           
             policy = await updatePolicyDuration(policy);
         }
 
@@ -252,10 +255,12 @@ const CalculateTimeOffDays = async (req, res) => {
         // Calculate days since the start date excluding Sundays
         const daysSinceStartExcludingSundays = calculateDaysSinceStartExcludingSundays(userStartDate, currentDate);
         // Calculate accrued days based on the policy's settings
-        user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingSundays, policyStart);
+        accruedDays = calculateAccruedDays(policy, daysSinceStartExcludingSundays, policyStart);
         await user.save();
-
-        return res.status(200).json({ daysSinceStartExcludingSundays, accruedDays: user.accruedDays });
+        const startmonthnumber = getMonthNumber(policy.startMonth);
+        const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+        const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+        return res.status(200).json({ daysSinceStartExcludingSundays, accruedDays: user.accruedDays, userStartDate , endDate });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -321,7 +326,7 @@ const calculateDaysSinceStartExcludingSundays = (startDate, endDate) => {
 }
 
 // Function to calculate accrued days based on the policy's settings for all cycles
-const calculateAccruedDays = (policy, daysSinceStartExcludingSundays) => {
+const calculateAccruedDays = (policy, daysSinceStartExcludingSundays  ) => {
     const workingDaysPerMonth = policy.workingDays;
     const timeOffDaysPerWorkingDay = policy.TimeOffDaysPerWorkingDays;
     let accruedDays = 0;
@@ -330,6 +335,7 @@ const calculateAccruedDays = (policy, daysSinceStartExcludingSundays) => {
     console.log('accruedDays', accruedDays);
     return accruedDays;
 }
+
 
 
 // Function to get the month name from the month index
