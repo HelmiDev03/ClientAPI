@@ -1,7 +1,9 @@
 
 const  TimeOffs = require('../../models/timeoff')
 const Users = require('../../models/user')
+const  Notifications = require('../../models/notification')
 
+const { io}  = require('../../server');
 
 
 const AddNewTimeOff = async (req,res)=>{
@@ -29,16 +31,37 @@ const AddNewTimeOff = async (req,res)=>{
         daterange,
         userId: req.user.id
     })
+    await Notifications.create({
+        content:{}
+        // Add other necessary fields
+    });
+
+    // Emit an event to notify clients about the new notification
+  
+    
     return res.status(200).json({message : "Time off request created successfully"})
 
 
     }
 
     catch(error){
+        console.log(error)
         return res.status(500).json({error})
     }
 
 
+}
+
+
+
+const GetUserTimeOffs = async (req,res)=>{
+    try{
+        const timeoffs = await TimeOffs.find({userId : req.user.id}).populate('supervisor' , 'firstname lastname profilepicture ')
+        return res.status(200).json({timeoffs})
+    }
+    catch(error){
+        return res.status(500).json({error})
+    }
 }
 
 
@@ -63,5 +86,6 @@ const AddNewTimeOff = async (req,res)=>{
 
 
 module.exports = {
-    AddNewTimeOff
+    AddNewTimeOff,
+    GetUserTimeOffs,
 }
