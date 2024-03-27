@@ -25,14 +25,26 @@ const AddNewTimeOff = async (req,res)=>{
     if (Object.keys(errors).length > 0){
         return res.status(400).json(errors)
     }
-    await TimeOffs.create({
+    const timeoff = await TimeOffs.create({
         type,
         description,
         daterange,
         userId: req.user.id
     })
+
+const user = await Users.findById(req.user.id)
+user.password = undefined
     await Notifications.create({
-        content:{}
+        company : req.user.company,
+        content:{
+            reason : "Time off request",
+            timeoffid : timeoff._id,
+            user : user,
+            type: type,
+            startdate : daterange[0],
+            enddate : daterange[1],
+            requestedat : Date.now(),
+        }
         // Add other necessary fields
     });
 
@@ -51,6 +63,36 @@ const AddNewTimeOff = async (req,res)=>{
 
 
 }
+
+
+
+const UpdateTimeOff = async (req,res)=>{
+    try{
+        console.log(req.body)
+        await TimeOffs.findByIdAndUpdate(req.params.id , {etat : req.body.etat , response : req.body.response,supervisor:{firstname:req.user.firstname,lastname:req.user.lastname,profilepicture:req.user.profilepicture}})
+        return res.status(200).json({message : "Time off updated successfully"})
+    }
+
+    catch(error){
+        return res.status(500).json({error})
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -87,5 +129,6 @@ const GetUserTimeOffs = async (req,res)=>{
 
 module.exports = {
     AddNewTimeOff,
+    UpdateTimeOff,
     GetUserTimeOffs,
 }

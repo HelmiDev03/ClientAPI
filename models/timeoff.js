@@ -14,9 +14,9 @@ const TimeOffSchema = new Schema({
     description  :  { type : String , required : false},
     daterange : {type:Array , required : true},
     response : { type : String , required : false},
-    etat : { type : String , required : false , default : "pending"},
-    supervisor : { type: Schema.Types.ObjectId, ref: 'user' },
-     
+    etat : { type : String , required : false , default : "Pending"},
+    supervisor : {type:Object , required : false},
+    
 
 },
   {

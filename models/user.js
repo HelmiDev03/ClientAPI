@@ -6,7 +6,7 @@ const crypto = require('crypto');
 
 
 
-
+//i wan this butnumber 
 
 const UserSchema = new Schema({
   isVerified: { type: Boolean, default: false },
@@ -18,7 +18,8 @@ const UserSchema = new Schema({
   //permisiion taw baed
 
   password: { type: String, required: false },
-  phonenumber: { type: String, required: false, sparse: true ,default:""},
+  phonenumber: { type: String, required: false, unique:false ,default:Math.random()},
+
 
   profilepicture: { type: String, required: false },
   dateofbirth: { type: Date, required: false },

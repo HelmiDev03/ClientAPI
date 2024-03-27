@@ -25,7 +25,8 @@ catch (error) {
 
 const UpdateCompany = async (req, res) => {
     try{
-        const { name, phonenumber, domaine, anniversaire,adress,city, country, zip, logo } = req.body;
+        console.log(req.body)
+        const { name, phonenumber, domaine, anniversaire,adress,city, country, zip, logo,workingdays } = req.body;
         const errors = {}
         if ( !namePattern.test(name)) errors.name = "Invalid name";
         if ( !phonePattern.test(phonenumber)) errors.phonenumber = "Invalid phone number";
@@ -43,6 +44,7 @@ const UpdateCompany = async (req, res) => {
             city,
             country,
             zip,
+            workingdays,
             logo: url
         }, { new: true });
                 }
@@ -55,6 +57,7 @@ const UpdateCompany = async (req, res) => {
             adress,
             city,
             country,
+            workingdays,
             zip,
         }, { new: true });
       }          

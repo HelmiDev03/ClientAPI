@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const { GetPolicies, GetPolicy, CreatePolicy , UpdatePolicy , UpdateEmployeePolicy,AddNewEmployeesToPolicy,CalculateTimeOffDays  } = require('../controllers/timeoff/policy.controller');
 
-const {AddNewTimeOff,GetUserTimeOffs} = require('../controllers/timeoff/timeoff.controller');
+const {AddNewTimeOff,UpdateTimeOff,GetUserTimeOffs} = require('../controllers/timeoff/timeoff.controller');
 
 //policy
 router.get('/', passport.authenticate('jwt' , {session : false}), GetPolicies ) 
@@ -18,6 +18,7 @@ router.get('/calculate' , passport.authenticate('jwt' , {session : false}), Calc
 //absence
 
 router.post('/createtimeoff' ,  passport.authenticate('jwt' , {session : false}), AddNewTimeOff)
+router.put('/updatetimeoff/:id' ,  passport.authenticate('jwt' , {session : false}), UpdateTimeOff)
 router.get('/gettimeoff' ,  passport.authenticate('jwt' , {session : false}), GetUserTimeOffs)
 
 
