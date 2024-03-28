@@ -24,7 +24,8 @@ const CompanySchema = new Schema({
       'Thursday',
       'Friday',
     ]
-  }
+  },
+  
 },
 {
   timestamps: true

@@ -2,6 +2,7 @@
 const Companies = require('../../models/company');
 const Policies = require('../../models/policy');
 const Users = require('../../models/user');
+const TimeOffs = require('../../models/timeoff');
 
 
 
@@ -158,7 +159,7 @@ const AddNewEmployeesToPolicy = async (req, res) => {
         const employeesId = req.body.employeesId;
         const employees = await Users.find({ _id: { $in: employeesId } });
         await Promise.all(employees.map(async (employee) => {
-            await Users.findByIdAndUpdate(employee._id, { policy: policy._id , accruedDays:0 }, { new: true });
+            await Users.findByIdAndUpdate(employee._id, { policy: policy._id, accruedDays: 0 }, { new: true });
         }));
         let policies = await Policies.find({ company: req.user.company });
 
@@ -224,7 +225,7 @@ const CalculateTimeOffDays = async (req, res) => {
         const currentDate = new Date();
         const user = req.user;
         const company = await Companies.findById(user.company);
-        
+
 
         let policy = await Policies.findById(user.policy);
         let accruedDays = 0;
@@ -238,14 +239,14 @@ const CalculateTimeOffDays = async (req, res) => {
 
             // Calculate days since the start date excluding Sundays for last cycle if policy , timeofflastforever is true
             if (policy.timeOffLastForever) {
-            const startmonthnumber = getMonthNumber(policy.startMonth);
-            const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
-            const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
-            const daysSinceStartExcludingOffDays  = calculateDaysSinceStartExcludingOffDays(userStartDate, endDate,company.workingdays);
-            user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingOffDays , policyStart);
-            accruedDays = user.accruedDays;
+                const startmonthnumber = getMonthNumber(policy.startMonth);
+                const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+                const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+                const daysSinceStartExcludingOffDays = calculateDaysSinceStartExcludingOffDays(userStartDate, endDate, company.workingdays);
+                user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingOffDays, policyStart);
+                accruedDays = user.accruedDays;
             }
-           
+
             policy = await updatePolicyDuration(policy);
         }
 
@@ -257,14 +258,30 @@ const CalculateTimeOffDays = async (req, res) => {
         const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
 
         // Calculate days since the start date excluding Sundays
-        const daysSinceStartExcludingOffDays = calculateDaysSinceStartExcludingOffDays(userStartDate, currentDate,company.workingdays);
+        const daysSinceStartExcludingOffDays = calculateDaysSinceStartExcludingOffDays(userStartDate, currentDate, company.workingdays);
         // Calculate accrued days based on the policy's settings
-        accruedDays = calculateAccruedDays(policy, daysSinceStartExcludingOffDays , policyStart);
+
+        accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingOffDays, policyStart);
         await user.save();
         const startmonthnumber = getMonthNumber(policy.startMonth);
         const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
         const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
-        return res.status(200).json({ daysSinceStartExcludingOffDays, accruedDays: user.accruedDays, userStartDate , endDate });
+        const userTimeOffs = await TimeOffs.find({ userId: req.user.id, etat: "Approved" });
+
+        let used = 0
+        let timeoffapproved = []
+        for (let i = 0; i < userTimeOffs.length; i++) {
+            const startDate = new Date(userTimeOffs[i].daterange[0]);
+            const endDate = new Date(userTimeOffs[i].daterange[1]);
+            const differenceMs = endDate.getTime() - startDate.getTime()
+            const daysdiff = Math.round(differenceMs / (1000 * 60 * 60 * 24)) + 1;
+            timeoffapproved.push([startDate, endDate,daysdiff ,  userTimeOffs[i].type]);
+
+            const days = Math.abs(endDate.getDate() - startDate.getDate() + 1);
+            used += days
+        }
+        const available = Math.max(0, accruedDays - used);
+        return res.status(200).json({ daysSinceStartExcludingOffDays, accruedDays, used, available, timeoffapproved, userStartDate, endDate });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: error.message });
@@ -326,25 +343,27 @@ const getDayName = (dayIndex) => {
     return days[dayIndex];
 }
 
-const calculateDaysSinceStartExcludingOffDays = (startDate, endDate,workingdays) => {
+const calculateDaysSinceStartExcludingOffDays = (startDate, endDate, workingdays) => {
     console.log(workingdays)
     let daysSinceStartExcludingOffDays = 0;
     for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-        
+
         if (workingdays.includes(getDayName(date.getDay()))) {
             console.log(getDayName(date.getDay()))
             daysSinceStartExcludingOffDays++;
         }
     }
     return daysSinceStartExcludingOffDays;
-} 
+}
 // Function to calculate accrued days based on the policy's settings for all cycles
-const calculateAccruedDays = (policy, daysSinceStartExcludingOffDays  ) => {
+const calculateAccruedDays = (policy, daysSinceStartExcludingOffDays) => {
     const workingDaysPerMonth = policy.workingDays;
     const timeOffDaysPerWorkingDay = policy.TimeOffDaysPerWorkingDays;
     let accruedDays = 0;
-    accruedDays += Math.floor(daysSinceStartExcludingOffDays / workingDaysPerMonth) * timeOffDaysPerWorkingDay;
     console.log('daysSinceStartExcludingOffDays', daysSinceStartExcludingOffDays)
+    console.log('workingDaysPerMonth', workingDaysPerMonth)
+    console.log('timeOffDaysPerWorkingDay', timeOffDaysPerWorkingDay)
+    accruedDays += Math.floor(daysSinceStartExcludingOffDays / workingDaysPerMonth) * timeOffDaysPerWorkingDay;
     console.log('accruedDays', accruedDays);
     return accruedDays;
 }

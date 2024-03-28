@@ -3,7 +3,7 @@ const  TimeOffs = require('../../models/timeoff')
 const Users = require('../../models/user')
 const  Notifications = require('../../models/notification')
 
-const { io}  = require('../../server');
+
 
 
 const AddNewTimeOff = async (req,res)=>{
@@ -12,11 +12,27 @@ const AddNewTimeOff = async (req,res)=>{
     try{
         console.log(req.body)
     const errors={}
-    const {type , description , daterange}  = req.body
+    let {type , description , daterange}  = req.body
+    daterange = daterange.map(dateString => {
+        let date = new Date(dateString);
+        date.setDate(date.getDate() + 1);
+        return date.toISOString();
+    });
+  //daterange is format of 
+  /*
+  
+0
+"2024-05-14T23:00:00.000Z"
+1
+"2024-05-17T23:00:00.000Z"
+here the days are decremneted by 1 so we need to inccrement it by 1 , exemeple for 31/01/2010  , we need to send 01/02/2010
+  */
+
+     
     if(!type){
         errors.type = "Type is required"
     }
-    if (Date.now() > daterange[0]){
+    if (Date.now() > new Date(daterange[0])){
         errors.daterange = "Date range is invalid"
     }
     if (!description){
@@ -25,6 +41,7 @@ const AddNewTimeOff = async (req,res)=>{
     if (Object.keys(errors).length > 0){
         return res.status(400).json(errors)
     }
+   
     const timeoff = await TimeOffs.create({
         type,
         description,

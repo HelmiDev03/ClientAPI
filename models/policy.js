@@ -20,6 +20,7 @@ const PolicySchema = new Schema({
     MaxTimeOffDays : { type: Number, default : 7},
     nationaldays : { type: Boolean, default : true},
     timeofflastforever : { type: Boolean, default : true},
+    includerest: { type: Boolean, required: false, default: false },
     company : { type: Schema.Types.ObjectId, ref: 'companie' },
     
 
