@@ -114,7 +114,8 @@ const UpdateCompanyPackage = async (req, res) => {
 const UpdateNationalDays = async (req, res) => {
 
     try {
-        const {day,name} = req.body;
+        let {day,name} = req.body;
+        day = new Date(day)
         let company = await Companies.findOne({ _id: req.user.company });
         if (!company) {
             return res.status(404).json({ message: "Company not found" });
