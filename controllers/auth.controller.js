@@ -7,12 +7,12 @@ const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
-const { emailPattern, namePattern, phonePattern } = require('..//pattern')
+const {namePattern, phonePattern } = require('..//pattern')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
 const TfaToken = require('../models/tfaverification/tfatoken');
 const Policies = require('../models/policy');
-
+const PermissionGroup = require('../models/permissiongroup');
 
 
 const VerifyEmail = async (req, res) => {

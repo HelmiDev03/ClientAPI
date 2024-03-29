@@ -75,6 +75,10 @@ const notificationsRouter =  require('./routes/notifications')
 app.use('/api/notifications', notificationsRouter);
 
 
+const permissionRouter = require('./routes/permission');
+app.use('/api/permissions', permissionRouter);
+
+
 
 
 
