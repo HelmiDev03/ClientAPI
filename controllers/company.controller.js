@@ -2,7 +2,7 @@ const Users = require('../models/user');
 const Companies = require('../models/company');
 const  uploadImage = require('../mediaUpload/uploadmediaconfig')
 const {  namePattern, phonePattern } = require('..//pattern')
-//
+
 const GetCompanyData = async (req, res) => {
 
     try {
