@@ -159,8 +159,8 @@ const Register = async (req, res) => {
         })
         await policy.save()
         // update user with policy
-        await Users.findByIdAndUpdate(user._id, { policy: policy._id } , { new: true })
-        
+        await Users.findByIdAndUpdate(user._id, { policy: policy._id }, { new: true })
+
         return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
 
@@ -233,7 +233,7 @@ const Login = async (req, res) => {
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
                 company: findUser.company,
-                policy : findUser.policy
+                policy: findUser.policy
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -246,14 +246,28 @@ const Login = async (req, res) => {
         )
 
 
+        if (!findUser.tfa) {
+            
+
+            return res.status(200).json({
+                message: "Success",
+                email: findUser.email,
+                token: "Bearer " + token,
+                refreshToken: "Bearer " + refreshToken,
+                company: company
+
+            });
+
+        }
+
+        else {
+            return res.status(200).json({
+                message: "Success",
+                email: findUser.email,
+            })
+        }
 
 
-        return res.status(200).json({
-            message: "Success",
-            token: "Bearer " + token,
-            refreshToken: "Bearer " + refreshToken,
-            company: company
-        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -360,7 +374,7 @@ const UpdatePersonalInformation = async (req, res) => {
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
                     company: updateduser.company,
-                    policy : updateduser.policy
+                    policy: updateduser.policy
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
@@ -448,7 +462,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         postalcode: updateduser.postalcode,
                         tfa: updateduser.tfa,
                         company: updateduser.company,
-                        policy : updateduser.policy
+                        policy: updateduser.policy
                     },
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
@@ -653,7 +667,7 @@ const VerifytfaOtp = async (req, res) => {
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
                     company: updateduser.company,
-                    policy : updateduser.policy,
+                    policy: updateduser.policy,
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
@@ -719,6 +733,130 @@ const UpdateTfa = async (req, res) => {
 
 
 
+
+const SendTfaOtpBeforeLogin = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await Users.findOne({ email: email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email not found' })
+        }
+
+        const findToken = await TfaToken.findOne({ userId: user._id });
+        if (findToken) {
+            return res.status(400).json({ message: 'please try again later for security reasons' })
+        }
+        const result = await SendTFAOtp(user);
+        return res.status(200).json({ message: 'Otp sent to your email', email: email, token: result.id, expiredAt: result.expiredAt })
+    }
+
+
+
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const VerifyTokenTfaExist = async (req, res) => {
+    try {
+        const { tokenid } = req.body;
+        const findToken = await TfaToken.findById(tokenid);
+        if (!findToken) {
+            return res.status(400).json({ message: 'Invalid token' })
+        }
+        return res.status(200).json({ message: 'Token verified successfully' })
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+const VerifytfaOtpBeforeLogin = async (req, res) => {
+    const { email, otp } = req.body;
+    console.log(email, otp)
+    try {
+        const findUser = await Users.findOne({ email });
+        if (!findUser) {
+            return res.status(400).json({ message: 'Email not found' })
+        }
+        const findToken = await TfaToken.findOne({ userId: findUser._id });
+        if (!findToken) {
+            return res.status(400).json({ message: 'Otp not found' })
+        }
+        if (findToken.token !== otp) {
+            return res.status(400).json({ message: 'Invalid Otp' })
+        }
+        if (findToken.expiresIn < Date.now()) {
+            return res.status(400).json({ message: 'Otp expired' })
+        }
+        const company = await Companies.findById(findUser.company)
+
+
+        const token = jwt.sign(
+            {
+                _id: findUser._id,
+                firstname: findUser.firstname,
+                lastname: findUser.lastname,
+                email: findUser.email,
+                cin: findUser.cin,
+                role: findUser.role,
+                role: findUser.role,
+                username: findUser.username,
+                phonenumber: findUser.phonenumber,
+                profilepicture: findUser.profilepicture,
+                dateofbirth: findUser.dateofbirth,
+                matricule: findUser.matricule,
+                createdAt: findUser.createdAt,
+                gender: findUser.gender,
+                maritalstatus: findUser.maritalstatus,
+                nationality: findUser.nationality,
+                adress: findUser.adress,
+
+                city: findUser.city,
+                country: findUser.country,
+                postalcode: findUser.postalcode,
+                tfa: findUser.tfa,
+                company: findUser.company,
+                policy: findUser.policy
+            },
+            process.env.PRIVATE_KEY,
+            { expiresIn: '10m' }
+        );
+
+        const refreshToken = jwt.sign(
+            { _id: findUser._id },
+            process.env.PRIVATE_KEY,
+            { expiresIn: '7d' }
+        )
+
+
+
+
+        return res.status(200).json({
+            message: "Success",
+
+
+            token: "Bearer " + token,
+            refreshToken: "Bearer " + refreshToken,
+            company: company
+
+        });
+
+
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
 module.exports = {
     VerifyEmail,
     EmailExist,
@@ -739,4 +877,7 @@ module.exports = {
     SendTfaOtp,
     VerifytfaOtp,
     UpdateTfa,
+    SendTfaOtpBeforeLogin,
+    VerifyTokenTfaExist,
+    VerifytfaOtpBeforeLogin,
 }
