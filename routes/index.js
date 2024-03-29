@@ -17,7 +17,10 @@ const { VerifyEmail ,
         VerifyOtp,
         ChangePassword,
         SendTfaOtp,
+        VerifyTokenTfaExist,
         VerifytfaOtp,
+        VerifytfaOtpBeforeLogin,
+        SendTfaOtpBeforeLogin,
         UpdateTfa } = require('../controllers/auth.controller');
 const { RefreshToken } = require('../controllers/refreshtoken.controller');
 const passport = require('passport');
@@ -53,10 +56,17 @@ router.post('/forgetpassword/verifyotp', VerifyOtp)
 router.post('/forgetpassword/changepassword', ChangePassword)
 
 
-//tfa
+//tfa (after login)
 router.post('/tfa/sendotp',passport.authenticate('jwt' , {session : false}), SendTfaOtp)
 router.post('/tfa/verifyotp',passport.authenticate('jwt' , {session : false}), VerifytfaOtp)
 router.put('/tfa/disable',passport.authenticate('jwt' , {session : false}), UpdateTfa)
+
+
+//tfa (before login)
+router.post('/tfa/verifytokenexist', VerifyTokenTfaExist)
+router.post('/tfa/beforelogin/sendotp', SendTfaOtpBeforeLogin)
+router.post('/tfa/beforelogin/verifyotp', VerifytfaOtpBeforeLogin)
+
 
 
 
