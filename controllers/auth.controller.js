@@ -12,7 +12,7 @@ const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
 const TfaToken = require('../models/tfaverification/tfatoken');
 const Policies = require('../models/policy');
-
+//
 
 
 const VerifyEmail = async (req, res) => {
