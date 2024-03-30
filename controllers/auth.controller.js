@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
-const {namePattern, phonePattern } = require('..//pattern')
+const { namePattern, phonePattern } = require('..//pattern')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
 const TfaToken = require('../models/tfaverification/tfatoken');
@@ -158,8 +158,45 @@ const Register = async (req, res) => {
             company: company._id
         })
         await policy.save()
+        const permissionGroup = await PermissionGroup.create({
+            company: company._id,
+            name: 'Administrators',
+            isadministrators: true,
+            isdefault: false,
+            iscustom: false,
+            viewallemployees: true,
+            viewemployeedetails: true,
+            deleteemployee: true,
+            addnewemployee: true,
+            editemployeedetails: true,
+            viewcompanydetails: true,
+            editcompanyinfo: true,
+            answertimeOffrequests: true,
+            viewtimeoffpiliciespage: true,
+            viewtimeoffpolicydetails: true,
+            addnewtimeoffpolicy: true,
+            removepolicy: true,
+            setpolicyasdefault: true,
+            addnationalday: true,
+            deletenationaldays: true,
+            editpolicyconfig: true,
+            addnewemployeetoapolicy: true,
+            changeemployeepolicy: true
+        })
+        await permissionGroup.save()
+        
+        const defaultpermissionGroup = await PermissionGroup.create({
+            company: company._id,
+            name: 'DefaultGroup',
+            isadministrators: false,
+            isdefault: true,
+            iscustom: false,
+
+        })
+        await defaultpermissionGroup.save()
+
         // update user with policy
-        await Users.findByIdAndUpdate(user._id, { policy: policy._id }, { new: true })
+        await Users.findByIdAndUpdate(user._id, { policy: policy._id }, { permissionGroup: permissionGroup._id }, { new: true })
 
         return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
@@ -233,7 +270,8 @@ const Login = async (req, res) => {
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
                 company: findUser.company,
-                policy: findUser.policy
+                policy: findUser.policy,
+                permissionGroup: findUser.permissionGroup
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
@@ -247,7 +285,7 @@ const Login = async (req, res) => {
 
 
         if (!findUser.tfa) {
-            
+
 
             return res.status(200).json({
                 message: "Success",
@@ -374,7 +412,8 @@ const UpdatePersonalInformation = async (req, res) => {
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
                     company: updateduser.company,
-                    policy: updateduser.policy
+                    policy: updateduser.policy,
+                    permissionGroup: updateduser.permissionGroup
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
@@ -462,7 +501,8 @@ const UpdateProfilePictureDecision = async (req, res) => {
                         postalcode: updateduser.postalcode,
                         tfa: updateduser.tfa,
                         company: updateduser.company,
-                        policy: updateduser.policy
+                        policy: updateduser.policy,
+                        permissionGroup: updateduser.permissionGroup
                     },
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
@@ -668,6 +708,7 @@ const VerifytfaOtp = async (req, res) => {
                     tfa: updateduser.tfa,
                     company: updateduser.company,
                     policy: updateduser.policy,
+                    permissionGroup: updateduser.permissionGroup
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
@@ -710,7 +751,8 @@ const UpdateTfa = async (req, res) => {
                     postalcode: updateduser.postalcode,
                     tfa: updateduser.tfa,
                     company: updateduser.company,
-                    policy: updateduser.policy
+                    policy: updateduser.policy,
+                    permissionGroup: updateduser.permissionGroup
                 },
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
@@ -819,7 +861,8 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
                 postalcode: findUser.postalcode,
                 tfa: findUser.tfa,
                 company: findUser.company,
-                policy: findUser.policy
+                policy: findUser.policy,
+                permissionGroup: findUser.permissionGroup
             },
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }

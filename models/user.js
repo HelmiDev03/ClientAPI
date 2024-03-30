@@ -43,6 +43,11 @@ const UserSchema = new Schema({
   usedDays: { type: Number, required: false , default: 0},
 
 
+
+  //needed for permission
+  permissionGroup: { type: Schema.Types.ObjectId, ref: 'permissiongroup' },
+
+
   //hedhom lezem kinged fazt google
   googleid: { type: String, required: false ,unique: true},
   secret: { type: String, required: false , unique: true},

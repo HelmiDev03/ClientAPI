@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig')
 const Policies = require('../models/policy');
-
+const PermissionGroup = require('../models/permissiongroup');
 
 
 const GetAllEmployees = async (req, res) => {
@@ -29,6 +29,7 @@ const AddNewEmployee = async (req, res) => {
     console.log(req.body);
     try {
         const policy = await Policies.findOne({ isdefault: true, company: req.user.company });
+        const permissinGroup = await PermissionGroup.findOne({  isdefault: true, company: req.user.company });
         let user = {}
 
         const {
@@ -67,7 +68,9 @@ const AddNewEmployee = async (req, res) => {
                 profilepicture: url,
                 company: req.user.company,
                 isVerified: true,
-                policy : policy._id
+                policy : policy._id,
+                permissionGroup : permissinGroup._id
+                
             });
             await user.save();
         }
@@ -84,7 +87,8 @@ const AddNewEmployee = async (req, res) => {
                 password: hashed,
                 company: req.user.company,
                 isVerified: true,
-                policy : policy._id
+                policy : policy._id,
+                permissionGroup : permissinGroup._id
             });
             await user.save();
         }
@@ -99,9 +103,19 @@ const AddNewEmployee = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        let permissionGroups = await PermissionGroup.find({ company: req.user.company });
+
+        let permissionGroupsWithUsers = [];
+
+        await Promise.all(permissionGroups.map(async (permissionGroup) => {
+
+            const users = await Users.find({ permissionGroup: permissionGroup._id });
+            const permissionGroupWithUsers = { ...permissionGroup.toObject(), users };
+            permissionGroupsWithUsers.push(permissionGroupWithUsers);
+        }));
      
 
-        return res.status(201).json({ message: 'Employee added successfully'  ,  policies: policiesWithUsers});
+        return res.status(201).json({ message: 'Employee added successfully'  ,  policies: policiesWithUsers ,  permissionGroups: permissionGroupsWithUsers});
 
     }
 
