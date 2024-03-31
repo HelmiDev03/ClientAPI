@@ -32,7 +32,7 @@ const PermissionGroupSchema = new Schema({
 
     //policies page
     viewtimeoffpiliciespage : { type: Boolean, required:  false , default:  true},
-    viewtimeoffpolicydetails : { type: Boolean, required:  false , default:  true},
+    viewtimeoffpolicydetails : { type: Boolean, required:  false , default:  false},
     addnewtimeoffpolicy : { type: Boolean, required:  false , default:   false},
     removepolicy : { type: Boolean, required:  false , default:   false},
     setpolicyasdefault : { type: Boolean, required:  false , default:   false},
