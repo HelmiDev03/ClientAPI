@@ -158,8 +158,8 @@ const setnewDefaultPolicy = async (req, res) => {
             return res.status(404).json({ message: 'Policy not found' });
         }
         //seting old dault policy to faslelse
-        await Policies.findOneAndUpdate({ isdefault: true }, { isdefault: false })
-        await Policies.findByIdAndUpdate(req.params.id, { isdefault: true });
+        await Policies.findOneAndUpdate({ isdefault: true , company:req.user.company }, { isdefault: false } , { new: true })
+        await Policies.findByIdAndUpdate(req.params.id, { isdefault: true } , { new: true });
         let policies = await Policies.find({ company: req.user.company });
 
         let policiesWithUsers = [];

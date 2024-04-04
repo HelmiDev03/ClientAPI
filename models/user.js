@@ -24,7 +24,7 @@ const UserSchema = new Schema({
   profilepicture: { type: String, required: false },
   dateofbirth: { type: Date, required: false },
   createdAt: { type: Date, default: Date.now },
-  matricule : { type: String, required: false , unique: true , default :crypto.randomBytes(12).toString('hex')},
+  matricule : { type: String, required: false , unique: true , default :crypto.randomBytes(12).toString('base64')},
   gender: { type: String, required: false },
   maritalstatus : { type: String, required: false , default: 'single'},
 

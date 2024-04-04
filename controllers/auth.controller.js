@@ -199,7 +199,7 @@ const Register = async (req, res) => {
         await defaultpermissionGroup.save()
 
         // update user with policy
-        await Users.findByIdAndUpdate(user._id, { policy: policy._id }, { permissionGroup: permissionGroup._id }, { new: true })
+        await Users.findByIdAndUpdate(user._id, { policy: policy._id ,permissionGroup: permissionGroup._id }, { new: true })
 
         return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
