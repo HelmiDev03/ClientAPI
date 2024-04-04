@@ -69,8 +69,8 @@ const AddNewEmployee = async (req, res) => {
                 company: req.user.company,
                 isVerified: true,
                 policy : policy._id,
-                permissionGroup : permissinGroup._id
-                
+                permissionGroup : permissinGroup._id,
+                manager : req.user._id
             });
             await user.save();
         }
@@ -88,7 +88,8 @@ const AddNewEmployee = async (req, res) => {
                 company: req.user.company,
                 isVerified: true,
                 policy : policy._id,
-                permissionGroup : permissinGroup._id
+                permissionGroup : permissinGroup._id,
+                manager : req.user._id
             });
             await user.save();
         }
@@ -205,7 +206,27 @@ const DeleteEmployee = async (req, res) => {
 
 
 
+const UpdateEmployeeManager = async (req, res) => {
+    try {
+        const employee = await Users.findOne({ _id: req.params.employeeid });
+        const manager = await Users.findOne({ _id: req.params.managerid });
+        console.log(employee);
+        console.log(manager);
+        
+            employee.manager = manager._id;
+            await employee.save();
+            return res.status(200).json({ message: 'Employee manager updated successfully' });
+        
+    }
 
+
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: err.message });
+    }
+
+
+}
 
 
 
@@ -232,4 +253,5 @@ module.exports = {
     AddNewEmployee,
     GetEmployee,
     DeleteEmployee,
+    UpdateEmployeeManager,
 }

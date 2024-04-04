@@ -42,7 +42,8 @@ const UserSchema = new Schema({
   availableDays: { type: Number, required: false , default: 0},
   usedDays: { type: Number, required: false , default: 0},
 
-
+//manager
+   manager  : { type: Schema.Types.ObjectId, ref: 'user' },
 
   //needed for permission
   permissionGroup: { type: Schema.Types.ObjectId, ref: 'permissiongroup' },

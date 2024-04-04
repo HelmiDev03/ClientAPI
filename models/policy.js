@@ -21,6 +21,7 @@ const PolicySchema = new Schema({
     nationaldays : { type: Boolean, default : true},
     timeofflastforever : { type: Boolean, default : true},
     includerest: { type: Boolean, required: false, default: false },
+    maxcounter : { type: Number, default : 0},
     company : { type: Schema.Types.ObjectId, ref: 'companie' },
     
 

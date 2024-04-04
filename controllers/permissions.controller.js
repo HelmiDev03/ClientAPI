@@ -120,7 +120,9 @@ const GetUserPermissionGroup = async (req, res) => {
 
 
     try {
+        console.log(req)
         const group = await PermissionGroup.findOne({ _id: req.user.permissionGroup });
+        console.log(group)  
 
         return res.status(200).json({ group });
 
@@ -136,6 +138,15 @@ const GetUserPermissionGroup = async (req, res) => {
 
 const DeletePermissionGroup = async (req, res) => {
     try {
+        const users = await Users.find({ permissionGroup: req.params.id });
+        console.log(users)
+        const defaultgroup = await PermissionGroup.findOne({ company: req.user.company , isdefault : true})
+        
+        //change to group default
+        await Promise.all(users.map(async (user) => {
+            
+            await Users.findByIdAndUpdate(user._id, { permissionGroup:  defaultgroup._id }, { new: true });
+        }));
         const permissionGroup = await PermissionGroup.findOneAndDelete({ _id: req.params.id });
 
 
@@ -257,6 +268,22 @@ const UpdateEmployeeGroup = async (req, res) => {
 
 
 
+const GetManagers = async (req, res) => {
+
+    try {
+        const group_managers = await PermissionGroup.find({ company: req.user.company, canbemanager:true });
+        
+        const managers = await Users.find({ permissionGroup: { $in: group_managers.map(group => group._id) } });
+        console.log(managers)
+        return res.status(200).json({ managers });
+    }
+
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 
 
 
@@ -280,4 +307,5 @@ module.exports = {
     UpdateCustomPermissionGroup,
     UpdateCustomPermissionGroupEmployees,
     UpdateEmployeeGroup,
+    GetManagers,
 }

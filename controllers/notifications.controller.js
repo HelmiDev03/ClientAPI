@@ -9,7 +9,7 @@ const PermissionGroup = require('../models/permissiongroup');
 
 const GetNotifications = async (req,res)=>{
     try{
-        const notifications = await Notifications.find({company : req.user.company}).sort({createdAt : -1})
+        const notifications = await Notifications.find({company : req.user.company ,userId : req.user._id}).sort({createdAt : -1})
         return res.status(200).json({notifications})
     }
     catch(error){

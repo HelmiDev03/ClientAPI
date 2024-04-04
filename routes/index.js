@@ -21,7 +21,8 @@ const { VerifyEmail ,
         VerifytfaOtp,
         VerifytfaOtpBeforeLogin,
         SendTfaOtpBeforeLogin,
-        UpdateTfa } = require('../controllers/auth.controller');
+        UpdateTfa,
+        UpdateProfilePictureMobile } = require('../controllers/auth.controller');
 const { RefreshToken } = require('../controllers/refreshtoken.controller');
 const passport = require('passport');
 
@@ -44,7 +45,8 @@ router.put('/update/personalinformation',passport.authenticate('jwt' , {session 
 router.put('/update/password',passport.authenticate('jwt' , {session : false}), UpdatePassword)
 router.put('/update/profilepicture',passport.authenticate('jwt' , {session : false}),UpdateProfilePicture)
 router.post('/updateprofilepicture/decison',passport.authenticate('jwt' , {session : false}), UpdateProfilePictureDecision)
-
+//for mobile
+router.put('/updateprofilepicture/mobile',passport.authenticate('jwt' , {session : false}), UpdateProfilePictureMobile)
 
 
 

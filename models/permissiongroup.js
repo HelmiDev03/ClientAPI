@@ -28,7 +28,9 @@ const PermissionGroupSchema = new Schema({
     viewcompanydetails : { type: Boolean, required:  false , default:  true},
     editcompanyinfo : { type: Boolean, required:  false , default:   false},
     //end company details page
-    answertimeOffrequests : { type: Boolean, required:  false , default:   false},
+
+
+    canbemanager : { type: Boolean, required:  false , default:   false},
 
     //policies page
     viewtimeoffpiliciespage : { type: Boolean, required:  false , default:  true},

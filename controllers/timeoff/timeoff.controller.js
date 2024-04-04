@@ -53,7 +53,9 @@ const user = await Users.findById(req.user.id)
 user.password = undefined
     await Notifications.create({
         company : req.user.company,
+        userId : req.user.manager,
         content:{
+            
             reason : "Time off request",
             timeoffid : timeoff._id,
             user : user,

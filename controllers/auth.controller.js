@@ -138,9 +138,12 @@ const Register = async (req, res) => {
             cin,
             role,
             password: hash,
-            company: company._id
+            company: company._id,
+            
         })
         await user.save()
+        await Users.findByIdAndUpdate(user._id, { manager: user._id }, { new: true })
+        
         user.password = undefined
         SendVerificationMail(user)
         const policy = await Policies.create({
@@ -171,7 +174,7 @@ const Register = async (req, res) => {
             editemployeedetails: true,
             viewcompanydetails: true,
             editcompanyinfo: true,
-            answertimeOffrequests: true,
+            canbemanager: true,
             viewtimeoffpiliciespage: true,
             viewtimeoffpolicydetails: true,
             addnewtimeoffpolicy: true,
@@ -244,35 +247,9 @@ const Login = async (req, res) => {
         }
         const company = await Companies.findById(findUser.company)
 
-
+       findUser.password = undefined
         const token = jwt.sign(
-            {
-                _id: findUser._id,
-                firstname: findUser.firstname,
-                lastname: findUser.lastname,
-                email: findUser.email,
-                cin: findUser.cin,
-                role: findUser.role,
-                role: findUser.role,
-                username: findUser.username,
-                phonenumber: findUser.phonenumber,
-                profilepicture: findUser.profilepicture,
-                dateofbirth: findUser.dateofbirth,
-                matricule: findUser.matricule,
-                createdAt: findUser.createdAt,
-                gender: findUser.gender,
-                maritalstatus: findUser.maritalstatus,
-                nationality: findUser.nationality,
-                adress: findUser.adress,
-
-                city: findUser.city,
-                country: findUser.country,
-                postalcode: findUser.postalcode,
-                tfa: findUser.tfa,
-                company: findUser.company,
-                policy: findUser.policy,
-                permissionGroup: findUser.permissionGroup
-            },
+            findUser.toJSON(),
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
         );
@@ -389,32 +366,9 @@ const UpdatePersonalInformation = async (req, res) => {
         }, { new: true })
 
         if (updateduser) {
+            updateduser.password = undefined
             const token = jwt.sign(
-                {
-                    _id: updateduser._id,
-                    firstname: updateduser.firstname,
-                    lastname: updateduser.lastname,
-                    email: updateduser.email,
-                    cin: updateduser.cin,
-                    role: updateduser.role,
-                    username: updateduser.username,
-                    phonenumber: updateduser.phonenumber,
-                    profilepicture: updateduser.profilepicture,
-                    dateofbirth: updateduser.dateofbirth,
-                    matricule: updateduser.matricule,
-                    createdAt: updateduser.createdAt,
-                    gender: updateduser.gender,
-                    maritalstatus: updateduser.maritalstatus,
-                    nationality: updateduser.nationality,
-                    adress: updateduser.adress,
-                    city: updateduser.city,
-                    country: updateduser.country,
-                    postalcode: updateduser.postalcode,
-                    tfa: updateduser.tfa,
-                    company: updateduser.company,
-                    policy: updateduser.policy,
-                    permissionGroup: updateduser.permissionGroup
-                },
+                updateduser.toJSON(),
                 process.env.PRIVATE_KEY,
                 { expiresIn: '1h' }
             );
@@ -478,32 +432,9 @@ const UpdateProfilePictureDecision = async (req, res) => {
         else if (choose === 'Confirm') {
             const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
             if (updateduser) {
+                updateduser.password = undefined
                 const token = jwt.sign(
-                    {
-                        _id: updateduser._id,
-                        firstname: updateduser.firstname,
-                        lastname: updateduser.lastname,
-                        email: updateduser.email,
-                        cin: updateduser.cin,
-                        role: updateduser.role,
-                        username: updateduser.username,
-                        phonenumber: updateduser.phonenumber,
-                        profilepicture: updateduser.profilepicture,
-                        dateofbirth: updateduser.dateofbirth,
-                        matricule: updateduser.matricule,
-                        createdAt: updateduser.createdAt,
-                        gender: updateduser.gender,
-                        maritalstatus: updateduser.maritalstatus,
-                        nationality: updateduser.nationality,
-                        adress: updateduser.adress,
-                        city: updateduser.city,
-                        country: updateduser.country,
-                        postalcode: updateduser.postalcode,
-                        tfa: updateduser.tfa,
-                        company: updateduser.company,
-                        policy: updateduser.policy,
-                        permissionGroup: updateduser.permissionGroup
-                    },
+                    updateduser.toJSON(),
                     process.env.PRIVATE_KEY,
                     { expiresIn: '10m' }
                 );
@@ -531,6 +462,46 @@ const UpdateProfilePictureDecision = async (req, res) => {
     }
 }
 
+//mobile
+const UpdateProfilePictureMobile = async (req, res) => {
+
+    try {
+
+       
+        let ImageUrl = await uploadImage(req.body.image)
+        
+        
+        
+            const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
+            updateduser.password = undefined    
+                const token = jwt.sign(
+                    updateduser.toJSON(),
+                    process.env.PRIVATE_KEY,
+                    { expiresIn: '10m' }
+                );
+                return res.status(200).json({
+                    message: "profile picture updated ",
+                    token: "Bearer " + token,
+
+                });
+            
+
+
+
+
+            
+        
+
+    }
+
+
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: error.message })
+
+   }
+
+}
 
 
 
@@ -684,32 +655,9 @@ const VerifytfaOtp = async (req, res) => {
         }
         const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: true }, { new: true });
         if (updateduser) {
+            updateduser.password = undefined
             const token = jwt.sign(
-                {
-                    _id: updateduser._id,
-                    firstname: updateduser.firstname,
-                    lastname: updateduser.lastname,
-                    email: updateduser.email,
-                    cin: updateduser.cin,
-                    role: updateduser.role,
-                    username: updateduser.username,
-                    phonenumber: updateduser.phonenumber,
-                    profilepicture: updateduser.profilepicture,
-                    dateofbirth: updateduser.dateofbirth,
-                    matricule: updateduser.matricule,
-                    createdAt: updateduser.createdAt,
-                    gender: updateduser.gender,
-                    maritalstatus: updateduser.maritalstatus,
-                    nationality: updateduser.nationality,
-                    adress: updateduser.adress,
-                    city: updateduser.city,
-                    country: updateduser.country,
-                    postalcode: updateduser.postalcode,
-                    tfa: updateduser.tfa,
-                    company: updateduser.company,
-                    policy: updateduser.policy,
-                    permissionGroup: updateduser.permissionGroup
-                },
+                updateduser.toJSON(),
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
             );
@@ -728,32 +676,9 @@ const UpdateTfa = async (req, res) => {
     try {
         const updateduser = await Users.findByIdAndUpdate(req.user._id, { tfa: false }, { new: true });
         if (updateduser) {
+            updateduser.password = undefined
             const token = jwt.sign(
-                {
-                    _id: updateduser._id,
-                    firstname: updateduser.firstname,
-                    lastname: updateduser.lastname,
-                    email: updateduser.email,
-                    cin: updateduser.cin,
-                    role: updateduser.role,
-                    username: updateduser.username,
-                    phonenumber: updateduser.phonenumber,
-                    profilepicture: updateduser.profilepicture,
-                    dateofbirth: updateduser.dateofbirth,
-                    matricule: updateduser.matricule,
-                    createdAt: updateduser.createdAt,
-                    gender: updateduser.gender,
-                    maritalstatus: updateduser.maritalstatus,
-                    nationality: updateduser.nationality,
-                    adress: updateduser.adress,
-                    city: updateduser.city,
-                    country: updateduser.country,
-                    postalcode: updateduser.postalcode,
-                    tfa: updateduser.tfa,
-                    company: updateduser.company,
-                    policy: updateduser.policy,
-                    permissionGroup: updateduser.permissionGroup
-                },
+                updateduser.toJSON(),
                 process.env.PRIVATE_KEY,
                 { expiresIn: '10m' }
             );
@@ -835,35 +760,9 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
         }
         const company = await Companies.findById(findUser.company)
 
-
+       findUser.password = undefined
         const token = jwt.sign(
-            {
-                _id: findUser._id,
-                firstname: findUser.firstname,
-                lastname: findUser.lastname,
-                email: findUser.email,
-                cin: findUser.cin,
-                role: findUser.role,
-                role: findUser.role,
-                username: findUser.username,
-                phonenumber: findUser.phonenumber,
-                profilepicture: findUser.profilepicture,
-                dateofbirth: findUser.dateofbirth,
-                matricule: findUser.matricule,
-                createdAt: findUser.createdAt,
-                gender: findUser.gender,
-                maritalstatus: findUser.maritalstatus,
-                nationality: findUser.nationality,
-                adress: findUser.adress,
-
-                city: findUser.city,
-                country: findUser.country,
-                postalcode: findUser.postalcode,
-                tfa: findUser.tfa,
-                company: findUser.company,
-                policy: findUser.policy,
-                permissionGroup: findUser.permissionGroup
-            },
+            findUser.toJSON(),
             process.env.PRIVATE_KEY,
             { expiresIn: '10m' }
         );
@@ -923,4 +822,5 @@ module.exports = {
     SendTfaOtpBeforeLogin,
     VerifyTokenTfaExist,
     VerifytfaOtpBeforeLogin,
+    UpdateProfilePictureMobile,
 }
