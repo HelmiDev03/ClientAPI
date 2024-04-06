@@ -13,6 +13,7 @@ const TimeOffSchema = new Schema({
     type :  { type : String , required : true},
     description  :  { type : String , required : false},
     daterange : {type:Array , required : true},
+    file : { type : String , required : false},
     response : { type : String , required : false},
     etat : { type : String , required : false , default : "Pending"},
     supervisor : {type:Object , required : false},

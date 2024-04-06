@@ -277,6 +277,117 @@ function getMonthName(monthIndex) {
     }
 }
 
+const CalculateTimeOffDaysOfEmployee = async(req,res)=>{
+    try {
+        const currentDate = new Date();
+        const user = await Users.findById(req.params.id)
+        console.log(user)
+
+        const company = await Companies.findById(user.company);
+
+
+        let policy = await Policies.findById(user.policy);
+        let accruedDays = user.accruedDays;
+        if (policyHasEnded(policy)) {
+            const policyStart = calculatePolicyStartDate(policy);
+
+            console.log('policystart', policyStart)
+            console.log('userjoiin', user.createdAt)
+
+            const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
+
+            // Calculate days since the start date excluding Sundays for last cycle if policy , timeofflastforever is true
+            if (policy.timeOffLastForever) {
+                const startmonthnumber = getMonthNumber(policy.startMonth);
+                const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+                const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+                const daysSinceStartExcludingOffDays = calculateDaysSinceStartExcludingOffDays(userStartDate, endDate, company.workingdays, company.nationaldays, policy);
+                user.accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingOffDays, policyStart);
+                accruedDays = user.accruedDays;
+            }
+
+            policy = await updatePolicyDuration(policy);
+        }
+
+        // Calculate the start date of the current policy cycle
+        const policyStart = calculatePolicyStartDate(policy);
+        console.log('policystart', policyStart)
+        console.log('userjoiin', user.createdAt)
+        // Determine the user's start date (either user creation date or policy start date)
+        const userStartDate = user.createdAt > policyStart ? user.createdAt : policyStart;
+
+        // Calculate days since the start date excluding Sundays
+        const daysSinceStartExcludingOffDays = calculateDaysSinceStartExcludingOffDays(userStartDate, currentDate, company.workingdays, company.nationaldays, policy);
+        // Calculate accrued days based on the policy's settings
+
+        accruedDays += calculateAccruedDays(policy, daysSinceStartExcludingOffDays, policyStart);
+        await user.save();
+        const startmonthnumber = getMonthNumber(policy.startMonth);
+        const durationValue = parseInt(policy.duration[0]); // Extract duration value (e.g., 6)
+        const endDate = new Date(Date.UTC(currentDate.getFullYear(), startmonthnumber + durationValue, 1));
+        const userTimeOffs = await TimeOffs.find({ userId:user.id, etat: "Approved" });
+
+        let used = 0
+        let timeoffapproved = []
+        for (let i = 0; i < userTimeOffs.length; i++) {
+            const startDate = new Date(userTimeOffs[i].daterange[0]);
+            const endDate = new Date(userTimeOffs[i].daterange[1]);
+
+            // Calculate difference in milliseconds
+            const differenceMs = endDate.getTime() - startDate.getTime();
+
+            // Convert difference to days and round it
+            const daysdiff = Math.round(differenceMs / (1000 * 60 * 60 * 24));
+
+            // Calculate total days between dates including both start and end dates
+            const totalDays = daysdiff + 1;
+            used += totalDays;
+            timeoffapproved.push([startDate, endDate, totalDays, userTimeOffs[i].type]);
+
+            // in case where the policy take national days as free days 
+            if (policy.nationaldays) {
+                for (let nationaldays = 0; nationaldays < company.nationaldays.length; nationaldays++) {
+                    const nationaldate = company.nationaldays[nationaldays].day
+                    console.log(nationaldate.getMonth() + 1, startDate.getMonth() + 1, nationaldate.getDate(), startDate.getDate(), nationaldate.getMonth() + 1, endDate.getMonth() + 1, nationaldate.getDate(), endDate.getDate())
+                    const isWithinRange = (
+                        (nationaldate.getMonth() + 1 == startDate.getMonth() + 1 && nationaldate.getDate() >= startDate.getDate()) &&
+                        (nationaldate.getMonth() + 1 == endDate.getMonth() + 1 && nationaldate.getDate() <= endDate.getDate())
+                    );
+
+                    isWithinRange ? used-- : undefined;
+                }
+
+            }
+            //end national days case
+        }
+        console.log(used)
+        const available = accruedDays - used;
+
+        return res.status(200).json({ daysSinceStartExcludingOffDays, accruedDays, used, available, timeoffapproved, userStartDate, endDate });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const CalculateTimeOffDays = async (req, res) => {
     try {
@@ -489,5 +600,6 @@ module.exports = {
     setnewDefaultPolicy,
     UpdateEmployeePolicy,
     AddNewEmployeesToPolicy,
-    CalculateTimeOffDays
+    CalculateTimeOffDays,
+    CalculateTimeOffDaysOfEmployee,
 };
