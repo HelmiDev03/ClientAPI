@@ -120,7 +120,7 @@ const GetUserPermissionGroup = async (req, res) => {
 
 
     try {
-        console.log(req)
+        
         const group = await PermissionGroup.findOne({ _id: req.user.permissionGroup });
         console.log(group)  
 
