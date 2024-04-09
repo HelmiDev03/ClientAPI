@@ -17,7 +17,6 @@ const TimeOffSchema = new Schema({
     response : { type : String , required : false},
     etat : { type : String , required : false , default : "Pending"},
     supervisor : {type:Object , required : false},
-    company : { type: Schema.Types.ObjectId, ref: 'companie' },
     
 
 },
