@@ -7,8 +7,10 @@ const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
 const SendOtp = require('../Emails/forgetpassword/sendOtp')
 const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
+
 const { namePattern, phonePattern } = require('..//pattern')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
+const uploadImageformobile = require('../mediaUpload/mobile/uploadmediaconfigformobile')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
 const TfaToken = require('../models/tfaverification/tfatoken');
 const Policies = require('../models/policy');
@@ -468,7 +470,7 @@ const UpdateProfilePictureMobile = async (req, res) => {
     try {
 
        
-        let ImageUrl = await uploadImage(req.body.image)
+        let ImageUrl = await uploadImageformobile(req.body.image)
         
         
         

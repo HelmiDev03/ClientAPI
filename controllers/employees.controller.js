@@ -5,7 +5,7 @@ const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig')
 const Policies = require('../models/policy');
 const PermissionGroup = require('../models/permissiongroup');
-
+const SendWelcomeEmail = require('../Emails/createnewemployee/sendwelcomeemail')
 
 const GetAllEmployees = async (req, res) => {
     try {
@@ -93,6 +93,8 @@ const AddNewEmployee = async (req, res) => {
             });
             await user.save();
         }
+        const company = await Companies.findOne({ _id: req.user.company });
+        SendWelcomeEmail(user,password, company.name , req.user);
         let policies = await Policies.find({ company: req.user.company });
 
         let policiesWithUsers = [];

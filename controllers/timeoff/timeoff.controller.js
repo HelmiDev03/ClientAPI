@@ -7,6 +7,7 @@ const uploadImage = require('../../mediaUpload/uploadmediaconfig')
 
 
 
+
 const AddNewTimeOff = async (req, res) => {
 
 
@@ -89,13 +90,14 @@ const AddNewTimeOff = async (req, res) => {
 
         let timeoff = {}
         if (file!='') {
-                const fileurl = await uploadImage(file)
+                const fileurl =await uploadImage(file)
                  timeoff = await TimeOffs.create({
                     type,
                     description,
                     daterange,
                     file : fileurl,
-                    userId: req.user.id
+                    userId: req.user.id,
+                    company : req.user.company
                 })
           }
         else{
@@ -103,7 +105,8 @@ const AddNewTimeOff = async (req, res) => {
                 type,
                 description,
                 daterange,
-                userId: req.user.id
+                userId: req.user.id,
+                company : req.user.company
             })
         }
 
@@ -130,6 +133,8 @@ const AddNewTimeOff = async (req, res) => {
         });
 
         // Emit an event to notify clients about the new notification
+        const unreadNotificationsCount = await Notifications.countDocuments({ userId: req.user.manager, seen: false });
+        io.emit('unreadNotificationsCount', {userId:req.user.manager,unreadNotificationsCount});
 
 
         return res.status(200).json({ message: "Time off request created successfully" })
@@ -150,7 +155,31 @@ const AddNewTimeOff = async (req, res) => {
 const UpdateTimeOff = async (req, res) => {
     try {
         console.log(req.body)
+        const timeoff = await TimeOffs.findById(req.params.id)
         await TimeOffs.findByIdAndUpdate(req.params.id, { etat: req.body.etat, response: req.body.response, supervisor: { firstname: req.user.firstname, lastname: req.user.lastname, profilepicture: req.user.profilepicture } })
+        const user = await Users.findById(req.user.id)
+        user.password = undefined
+        await Notifications.create({
+            company: req.user.company,
+            userId: timeoff.userId,
+            content: {
+
+                reason: "Time off request Answered",
+                timeoffid: timeoff._id,
+                user: user,
+                type: timeoff.type,
+                etat: req.body.etat,
+                response: req.body.response,
+                startdate:timeoff.daterange[0],
+                enddate: timeoff.daterange[1],
+                answredat: new Date(),
+            }
+            // Add other necessary fields
+        });
+
+        
+        const unreadNotificationsCount = await Notifications.countDocuments({ userId: timeoff.userId, seen: false });
+        io.emit('unreadNotificationsCount', {userId:timeoff.userId,unreadNotificationsCount});
         return res.status(200).json({ message: "Time off updated successfully" })
     }
 
