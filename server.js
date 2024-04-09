@@ -85,8 +85,25 @@ app.use('/api/permissions', permissionRouter);
 
 
  
+const { createServer } = require('http'); // Import the 'http' module
+const { Server } = require('socket.io');
+const server = createServer(app); // Pass your Express app to createServer
+global.io  = new Server(server,{
+    cors: {
+      origin: "http://localhost:3000", // Replace with your allowed origin
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
+    }
+    });
+
+
+
+
+io.on('connection', (socket) => {
+    console.log('User connected');
+
 });
 
+
+server.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
+});

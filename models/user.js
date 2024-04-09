@@ -7,6 +7,13 @@ const crypto = require('crypto');
 
 
 //i wan this butnumber 
+const generateMatricule = () => {
+  // Generate a random number between 1 and 999999999999
+  const randomNumber = Math.floor(Math.random() * 999999999999) + 1;
+  // Pad the number with leading zeros to ensure it has 15 digits
+  const paddedNumber = String(randomNumber).padStart(15, '0');
+  return paddedNumber;
+};
 
 const UserSchema = new Schema({
   isVerified: { type: Boolean, default: false },
@@ -24,7 +31,7 @@ const UserSchema = new Schema({
   profilepicture: { type: String, required: false },
   dateofbirth: { type: Date, required: false },
   createdAt: { type: Date, default: Date.now },
-  matricule : { type: String, required: false , unique: true , default :crypto.randomBytes(12).toString('base64')},
+  matricule : { type: String, required: false , unique: true , default :generateMatricule},
   gender: { type: String, required: false },
   maritalstatus : { type: String, required: false , default: 'single'},
 

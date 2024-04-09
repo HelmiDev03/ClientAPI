@@ -10,6 +10,7 @@ const SendTFAOtp = require('../Emails/tfalogin/SendTFAOtp')
 const { namePattern, phonePattern } = require('..//pattern')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
 const deleteImage = require('../mediaUpload/deletemediaconfig');
+const uploadImageformobile = require('../mediaUpload/mobile/uploadmediaconfigformobile')
 const TfaToken = require('../models/tfaverification/tfatoken');
 const Policies = require('../models/policy');
 const PermissionGroup = require('../models/permissiongroup');
@@ -468,7 +469,7 @@ const UpdateProfilePictureMobile = async (req, res) => {
     try {
 
        
-        let ImageUrl = await uploadImage(req.body.image)
+        let ImageUrl = await uploadImageformobile(req.body.image)
         
         
         
