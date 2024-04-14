@@ -13,6 +13,13 @@ const { file } = require('googleapis/build/src/apis/file')
 
 
 const AddNewTimeOff = async (req, res) => {
+    /* in the client side 
+     if (!fileName.endsWith('.pdf')) {
+            - Display an error message
+            - Exit the function if fileName doesn't end with .pdf (return  ;); 
+
+        }
+    */
 
 
     try {

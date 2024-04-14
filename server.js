@@ -80,6 +80,10 @@ const permissionRouter = require('./routes/permission');
 app.use('/api/permissions', permissionRouter);
 
 
+const projectsRouter = require('./routes/projects');
+app.use('/api/projects', projectsRouter);
+
+
 
 
 
