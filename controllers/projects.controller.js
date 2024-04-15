@@ -1,5 +1,6 @@
 const Project = require('../models/project');
-const User = require('../models/user');
+const Users = require('../models/user');
+const Tasks = require('../models/task');
 
 
 
@@ -63,6 +64,35 @@ const AddNewProject = async (req, res) => {
 };
 
 
+const GetEmployeeProject = async (req, res) => {
+    try {
+        const projects = await Project.find({ company: req.user.company , 'users.user': req.params.employeeid })
+        res.status(200).json({ projects });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const CloseProject = async (req, res) => {
     try {
@@ -94,26 +124,110 @@ const DeleteProject = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-const RemoveMemberFromProject = async (req, res) => {
+const GetProjectTasks = async (req, res) => {
     try {
-        const project = await Project.findOne({ _id: req.params.projectid });
-        project.users = project.users.filter(user => req.params.memberid === user.user.toString());
-        await project.save();
-        const projects = await Project.find({ company: req.user.company }).populate({
-            path: 'users.user',
+        const tasks = await Tasks.find({ project: req.params.projectid}).populate({
+            path: 'assignedto',
+            
+        }).populate({
+            path: 'author',
             
         })
-        res.status(200).json({ projects });
+        
+        res.status(200).json({ tasks });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
+}
+
+
+
+const CreateTask = async (req, res) => {
+    try {
+        const project = await Project.findOne({ _id: req.params.projectid });
+        await Tasks.create({
+            company: req.user.company,
+            name: req.body.name,
+            deadline: req.body.deadline,
+            project: project._id,
+            author: req.user._id,
+            assignedto : req.body.assignedto
+        });
+        const tasks = await Tasks.find({ project: req.params.projectid}).populate({
+            path: 'assignedto',
+            
+        }).populate({
+            path: 'author',
+            
+        })
+        res.status(200).json({ tasks });
+
+    }
+
+
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+
+    }
+}
+
+const GetTask = async (req, res) => {
+   
+
+        try{
+            const task = await Tasks.findOne({ _id: req.params.id }).populate({
+                path: 'assignedto',
+                
+            }).populate({
+                path: 'author',
+                
+            })
+            res.status(200).json({ task });
+        }
+
+        catch(error){
+            res.status(500).json({ message: error.message });
+      }
+}
+
+const DeleteTask = async (req, res) => {
+    try {
+        await Tasks.deleteOne({ _id: req.params.id });
+        const tasks = await Tasks.find({ project: req.params.projectid}).populate({
+            path: 'assignedto',
+            
+        }).populate({
+            path: 'author',
+            
+        })
+        res.status(200).json({ tasks });
+
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const UpdateTask = async (req, res) => {
+    try {
+        await Tasks.findOneAndUpdate({ _id: req.params.id },req.body  , { new: true });
+     
+        res.status(200).json({ message: 'Task updated successfully' });
+
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -121,9 +235,15 @@ const RemoveMemberFromProject = async (req, res) => {
 module.exports = {
     GetAllProjects,
     GetProject,
+    GetEmployeeProject,
     AddNewProject,
     CloseProject,
     DeleteProject,
-    RemoveMemberFromProject,
+    GetProjectTasks,
+    CreateTask,
+    DeleteTask,
+    GetTask,
+    UpdateTask
+
     
 };
