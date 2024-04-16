@@ -25,7 +25,7 @@ const UserSchema = new Schema({
   //permisiion taw baed
 
   password: { type: String, required: false },
-  phonenumber: { type: String, required: false, unique:false ,default:Math.random()},
+  phonenumber: { type: String, required: false, unique:true },
 
 
   profilepicture: { type: String, required: false },

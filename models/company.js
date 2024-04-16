@@ -6,7 +6,7 @@ const CompanySchema = new Schema({
   logo: { type: String, required: false },
   name: { type: String, required: true },
   domaine: { type: String, required: true },
-  phonenumber: { type: String, required: true },
+  phonenumber: { type: String, required: true , unique :true },
   anniversaire: { type: Date, required: false },
   adress: { type: String, required: false },
   city: { type: String, required: false },
