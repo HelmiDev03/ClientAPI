@@ -12,7 +12,7 @@ const CompanySchema = new Schema({
   city: { type: String, required: false },
   zip: { type: String, required: false },
   country: { type: String, required: false },
-  package: { type: String, required: false },
+  package: { type: String, required: false , default : "" },
   nationaldays: { type: Array, required: false },
   workingdays: {
     type: Array,

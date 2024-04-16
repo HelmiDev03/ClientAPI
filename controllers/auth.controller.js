@@ -519,11 +519,18 @@ const UpdateProfilePictureMobile = async (req, res) => {
 
 const ForgetPassword = async (req, res) => {
     try {
-        const email = req.body.email;
-
-        const user = await Users.findOne({ email })
+        const emailorcin = req.body.email;
+        
+        let user = await Users.findOne({ email: emailorcin });
+        let usernotfound = false;
         if (!user) {
-            return res.status(400).json({ message: 'Email not found' })
+            usernotfound = true;
+            user = await Users.findOne({ cin: emailorcin });
+        }
+        
+           
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
         }
         const findToken = await ForgetPasswordToken.findOne({ userId: user._id });
         if (findToken) {
