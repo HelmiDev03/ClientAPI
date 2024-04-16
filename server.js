@@ -101,7 +101,7 @@ const { Server } = require('socket.io');
 const server = createServer(app); // Pass your Express app to createServer
 global.io  = new Server(server,{
     cors: {
-      origin: "http://localhost:3000", // Replace with your allowed origin
+      origin: process.env.Domain, // Replace with your allowed origin
 
     }
     });
