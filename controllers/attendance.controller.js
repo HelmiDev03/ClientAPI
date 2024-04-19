@@ -110,7 +110,7 @@ const History = async (req, res) => {
         
         }
         console.log(workingHours[workingHours.length - 1])
-       console.log(workingHours[workingHours.length - 1]?.date.toString().slice(0, 10) , new Date().toString()?.slice(0, 10))
+        console.log(workingHours[workingHours.length - 1]?.date.toString().slice(0, 10) , new Date().toString()?.slice(0, 10))
    
         return res.status(200).json({ workingHours })
     }
