@@ -1,5 +1,6 @@
 const Users = require('../models/user');
 const Companies = require('../models/company');
+const Attendance  = require('../models/attendance');
 const VerificationToken = require('../models/authverification/VerificationToken');
 const ForgetPasswordToken = require('../models/forgetpassword/forgetPasswordToken');
 const jwt = require('jsonwebtoken')
@@ -197,7 +198,11 @@ const Register = async (req, res) => {
             iscustom: false,
 
         })
-        await defaultpermissionGroup.save()
+        await defaultpermissionGroup.save();
+        const attendance = await Attendance.create({
+            user : user._id,
+        })
+        await attendance.save()
 
         // update user with policy
         await Users.findByIdAndUpdate(user._id, { policy: policy._id ,permissionGroup: permissionGroup._id }, { new: true })

@@ -47,9 +47,11 @@ app.use(
       
     })
   );
+  
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Database connected');
+        
     })
     .catch((error) => {
         console.log('Error connecting to database');
@@ -84,6 +86,10 @@ const projectsRouter = require('./routes/projects');
 app.use('/api/projects', projectsRouter);
 
 
+const attendanceRouter = require('./routes/attendance');
+app.use('/api/attendance', attendanceRouter);
+
+
 
 
 
@@ -105,6 +111,7 @@ global.io  = new Server(server,{
 
     }
     });
+
 
 
 

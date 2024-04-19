@@ -1,4 +1,5 @@
 const Users = require('../models/user');
+const Attendance  = require('../models/attendance');
 const Companies = require('../models/company');
 const bcrypt = require('bcryptjs')
 const uploadImage = require('../mediaUpload/uploadmediaconfig')
@@ -118,6 +119,10 @@ const AddNewEmployee = async (req, res) => {
             const permissionGroupWithUsers = { ...permissionGroup.toObject(), users };
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
+        const attendance = await Attendance.create({
+            user : user._id,
+        })
+        await attendance.save()
      
 
         return res.status(201).json({ message: 'Employee added successfully'  ,  policies: policiesWithUsers ,  permissionGroups: permissionGroupsWithUsers});
