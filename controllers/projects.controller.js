@@ -67,6 +67,7 @@ const AddNewProject = async (req, res) => {
 const GetEmployeeProject = async (req, res) => {
     try {
         const projects = await Project.find({ company: req.user.company , 'users.user': req.params.employeeid })
+        console.log(projects)
         res.status(200).json({ projects });
     } catch (error) {
         res.status(500).json({ message: error.message });
