@@ -1,8 +1,9 @@
 const Users = require('../models/user');
 const Companies = require('../models/company');
-const Attendance  = require('../models/attendance');
+const Attendance = require('../models/attendance');
 const VerificationToken = require('../models/authverification/VerificationToken');
 const ForgetPasswordToken = require('../models/forgetpassword/forgetPasswordToken');
+const Notifications = require('../models/notification');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const SendVerificationMail = require('../Emails/registerverification/sendverificationmail')
@@ -141,11 +142,11 @@ const Register = async (req, res) => {
             role,
             password: hash,
             company: company._id,
-            
+
         })
         await user.save()
         await Users.findByIdAndUpdate(user._id, { manager: user._id }, { new: true })
-        
+
         user.password = undefined
         SendVerificationMail(user)
         const policy = await Policies.create({
@@ -189,7 +190,7 @@ const Register = async (req, res) => {
             changeemployeepolicy: true
         })
         await permissionGroup.save()
-        
+
         const defaultpermissionGroup = await PermissionGroup.create({
             company: company._id,
             name: 'DefaultGroup',
@@ -200,12 +201,12 @@ const Register = async (req, res) => {
         })
         await defaultpermissionGroup.save();
         const attendance = await Attendance.create({
-            user : user._id,
+            user: user._id,
         })
         await attendance.save()
 
         // update user with policy
-        await Users.findByIdAndUpdate(user._id, { policy: policy._id ,permissionGroup: permissionGroup._id }, { new: true })
+        await Users.findByIdAndUpdate(user._id, { policy: policy._id, permissionGroup: permissionGroup._id }, { new: true })
 
         return res.status(200).json({ message: 'Successfully Created. Please Check Your Email For verification', user, company })
     }
@@ -253,7 +254,7 @@ const Login = async (req, res) => {
         }
         const company = await Companies.findById(findUser.company)
 
-       findUser.password = undefined
+        findUser.password = undefined
         const token = jwt.sign(
             findUser.toJSON(),
             process.env.PRIVATE_KEY,
@@ -268,6 +269,12 @@ const Login = async (req, res) => {
 
 
         if (!findUser.tfa) {
+            const notifications = await Notifications.find({ userId: findUser._id, seen: false })
+            const unssennotifications = notifications.length
+            let userAttandance = await Attendance.findOne({ user: findUser._id });
+            const workingHours = userAttandance.workingHours.map(hour => hour);
+            const group = await PermissionGroup.findOne({ _id: findUser.permissionGroup });
+            const company = await Companies.findOne({ _id: findUser.company });
 
 
             return res.status(200).json({
@@ -275,7 +282,10 @@ const Login = async (req, res) => {
                 email: findUser.email,
                 token: "Bearer " + token,
                 refreshToken: "Bearer " + refreshToken,
-                company: company
+                company,
+                group,
+                workingHours,
+                unssennotifications,
 
             });
 
@@ -473,30 +483,30 @@ const UpdateProfilePictureMobile = async (req, res) => {
 
     try {
 
-       
+
         let ImageUrl = await uploadImageformobile(req.body.image)
-        
-        
-        
-            const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
-            updateduser.password = undefined    
-                const token = jwt.sign(
-                    updateduser.toJSON(),
-                    process.env.PRIVATE_KEY,
-                    { expiresIn: '10m' }
-                );
-                return res.status(200).json({
-                    message: "profile picture updated ",
-                    token: "Bearer " + token,
-
-                });
-            
 
 
 
+        const updateduser = await Users.findByIdAndUpdate(req.user._id, { profilepicture: ImageUrl }, { new: true });
+        updateduser.password = undefined
+        const token = jwt.sign(
+            updateduser.toJSON(),
+            process.env.PRIVATE_KEY,
+            { expiresIn: '10m' }
+        );
+        return res.status(200).json({
+            message: "profile picture updated ",
+            token: "Bearer " + token,
 
-            
-        
+        });
+
+
+
+
+
+
+
 
     }
 
@@ -505,7 +515,7 @@ const UpdateProfilePictureMobile = async (req, res) => {
         console.log(error)
         return res.status(500).json({ message: error.message })
 
-   }
+    }
 
 }
 
@@ -525,15 +535,15 @@ const UpdateProfilePictureMobile = async (req, res) => {
 const ForgetPassword = async (req, res) => {
     try {
         const emailorcin = req.body.email;
-        
+
         let user = await Users.findOne({ email: emailorcin });
         let usernotfound = false;
         if (!user) {
             usernotfound = true;
             user = await Users.findOne({ cin: emailorcin });
         }
-        
-           
+
+
         if (!user) {
             return res.status(400).json({ message: 'User not found' });
         }
@@ -771,9 +781,9 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
         if (findToken.expiresIn < Date.now()) {
             return res.status(400).json({ message: 'Otp expired' })
         }
-        const company = await Companies.findById(findUser.company)
 
-       findUser.password = undefined
+
+        findUser.password = undefined
         const token = jwt.sign(
             findUser.toJSON(),
             process.env.PRIVATE_KEY,
@@ -785,6 +795,12 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
             process.env.PRIVATE_KEY,
             { expiresIn: '7d' }
         )
+        const notifications = await Notifications.find({ userId: findUser._id, seen: false })
+        const unssennotifications = notifications.length
+        let userAttandance = await Attendance.findOne({ user: findUser._id });
+        const workingHours = userAttandance.workingHours.map(hour => hour);
+        const group = await PermissionGroup.findOne({ _id: findUser.permissionGroup });
+        const company = await Companies.findOne({ _id: findUser.company });
 
 
 
@@ -795,7 +811,11 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
 
             token: "Bearer " + token,
             refreshToken: "Bearer " + refreshToken,
-            company: company
+            company,
+            group,
+            workingHours,
+            unssennotifications,
+
 
         });
 

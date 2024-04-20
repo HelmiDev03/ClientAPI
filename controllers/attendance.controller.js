@@ -96,12 +96,7 @@ const ClockOut = async (req, res) => {
 const History = async (req, res) => {
     try {
         let userAttandance = await Attendance.findOne({ user: req.user._id });
-        //i wanna take only the one where attendance.workinghours.date(the year and moneth ) be equal to request body month and year
-       /* userAttandance.filter((attendance) => {
-            if (attendance.workingHours.date.getMonth() === req.body.month && attendance.workingHours.date.getFullYear() === req.body.year){
-                return attendance
-            }
-        })*/
+     
 
         const workingHours = []
         for (let i = 0; i < userAttandance.workingHours.length; i++) {

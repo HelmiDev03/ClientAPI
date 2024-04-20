@@ -98,9 +98,6 @@ app.use('/api/attendance', attendanceRouter);
 
 
 
-
-
-
  
 const { createServer } = require('http'); // Import the 'http' module
 const { Server } = require('socket.io');
