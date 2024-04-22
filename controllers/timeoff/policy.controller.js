@@ -26,6 +26,10 @@ const GetPolicies = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        //sortedby older createdt
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
 
         // Return the populated policies
         return res.status(200).json({ policies: policiesWithUsers });
@@ -65,6 +69,7 @@ const CreatePolicy = async (req, res) => {
     try {
         const findPolicy = await Policies.findOne({ name: req.body.name, company: req.user.company });
         if (findPolicy) {
+            
             return res.status(400).json({ name: 'Policy Name  Already Taken' });
         }
         const policy = new Policies({ ...req.body, company: req.user.company });
@@ -80,8 +85,12 @@ const CreatePolicy = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
         return res.status(200).json({ policies: policiesWithUsers });
     } catch (error) {
+       
 
         res.status(500).json({ message: error.message });
     }
@@ -110,6 +119,9 @@ const DeletePolicy = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
         return res.status(200).json({ policies: policiesWithUsers, message: 'Policy deleted successfully' });
     }
 
@@ -142,6 +154,9 @@ const UpdatePolicy = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
         return res.status(200).json({ policies: policiesWithUsers, message: "Policy updated successfully" });
 
 
@@ -171,6 +186,9 @@ const setnewDefaultPolicy = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
         return res.status(200).json({ policies: policiesWithUsers, message: 'Default policy updated successfully' });
     }
     catch (error) {
@@ -201,6 +219,9 @@ const UpdateEmployeePolicy = async (req, res) => {
                 const policyWithUsers = { ...policy.toObject(), employees };
                 policiesWithUsers.push(policyWithUsers);
             }));
+            policiesWithUsers.sort((a, b) => {
+                return new Date(a.createdAt) - new Date(b.createdAt);
+            });
             return res.status(200).json({ message: 'Employee policy updated successfully', policies: policiesWithUsers });
         }
 
@@ -230,6 +251,10 @@ const AddNewEmployeesToPolicy = async (req, res) => {
             const policyWithUsers = { ...policy.toObject(), employees };
             policiesWithUsers.push(policyWithUsers);
         }));
+        policiesWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
         return res.status(200).json({ message: 'Employees added to policy successfully', policies: policiesWithUsers });
     }
     catch (error) {

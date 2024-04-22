@@ -29,6 +29,12 @@ const GetPermissionGroups = async (req, res) => {
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
 
+
+        //sortedby older createdt
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
         return res.status(200).json({ permissionGroups: permissionGroupsWithUsers });
 
 
@@ -55,7 +61,7 @@ const GetPermissionGroup = async (req, res) => {
         const users = await Users.find({ permissionGroup: permissionGroup._id });
         permissionGroupsWithUsers.users = users;
 
-
+        
         return res.status(200).json({ permissionGroup: permissionGroupsWithUsers });
     }
 
@@ -100,6 +106,11 @@ const CreatePermissionGroup = async (req, res) => {
             const permissionGroupWithUsers = { ...permissionGroup.toObject(), users };
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
+
+
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
 
         return res.status(201).json({ permissionGroups: permissionGroupsWithUsers });
     }
@@ -161,6 +172,12 @@ const DeletePermissionGroup = async (req, res) => {
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
 
+
+
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
         return res.status(200).json({ permissionGroups: permissionGroupsWithUsers });
     }
 
@@ -188,6 +205,13 @@ const UpdateCustomPermissionGroup = async (req, res) => {
             const permissionGroupWithUsers = { ...permissionGroup.toObject(), users };
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
+
+
+
+
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
 
         return res.status(200).json({ message: 'updated', permissionGroups: permissionGroupsWithUsers });
 
@@ -227,6 +251,10 @@ const UpdateCustomPermissionGroupEmployees = async (req, res) => {
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
 
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
         return res.status(200).json({ message: 'Employees added to permission group successfully', permissionGroups: permissionGroupsWithUsers });
     }
 
@@ -256,6 +284,11 @@ const UpdateEmployeeGroup = async (req, res) => {
             const permissionGroupWithUsers = { ...permissionGroup.toObject(), users };
             permissionGroupsWithUsers.push(permissionGroupWithUsers);
         }));
+
+
+        permissionGroupsWithUsers.sort((a, b) => {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
 
         return res.status(200).json({ message: 'Employees added to permission group successfully', permissionGroups: permissionGroupsWithUsers });
     }

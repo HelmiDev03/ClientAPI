@@ -97,10 +97,10 @@ app.use('/api/attendance', attendanceRouter);
 
 
 
-
  
 const { createServer } = require('http'); // Import the 'http' module
 const { Server } = require('socket.io');
+
 const server = createServer(app); // Pass your Express app to createServer
 global.io  = new Server(server,{
     cors: {
