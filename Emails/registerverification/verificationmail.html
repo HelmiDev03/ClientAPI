@@ -1,69 +1,51 @@
-<!DOCTYPE html>
-<html>
+
+
+
+
+ <!-- Start of the email body -->
+
+ <!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Email Confirmation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style type="text/css">
-    /* Your CSS styles */
-  </style>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="shortcut icon" href="img/log.png" type="image/x-icon" />
+  <link rel="stylesheet" href="./main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+    integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href=
+    "https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+              rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
 </head>
-<body style="background-color: #e9ecef;">
-  <!-- Start of the email body -->
-  <table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <!-- Logo -->
-    <tr>
-      <td align="center" bgcolor="#e9ecef">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
-          <tr>
-            <td align="center" valign="top" style="padding: 36px 24px;">
-              <a target="_blank" style="display: inline-block;">
-                <img src="https://s3-alpha-sig.figma.com/img/fe88/6574/37bb4e942cb4b9843e2b8cadb2f61171?Expires=1710115200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cY4XsH0GToUVXSkEggaF5aVDafyx0HG1ZPCtIU5X~dJe8Z6Gyjrgpnxgrp6X3OHW3faAerjo4WorJ-v-VVNUcCT6BVgUA5uIxp2zpcfjeT7qHlrpcrzSdSgm5L3VLh3jkBjEKnJ0G6N~61mP57RoOgNSHCE~veWAvVTBvWJ0gD0v~HiUMAlEqe0KAHJq13dnictB6KSocWLIAuV773a~q3wDxcOJ~OevEySHhoe0XoHkIfIWtGJRiC7WS1mNprhxmk6~7SiCh7PxWYR0PI4rRy7s8aAHI3Z0srxzPs-n0hg5-qVlSZX74AuiDVMWIUu-v~jLfyEYlIvUgFx29BBPgw__" alt="Logo" border="0" width="48" style="display: block; width: 48px; max-width: 48px; min-width: 48px;">
-              </a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <!-- Hero section -->
-    <tr>
-      <td align="center" bgcolor="#e9ecef">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
-          <tr>
-            <td align="left" bgcolor="#ffffff" style="padding: 36px 24px 0; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; border-top: 3px solid #d4dadf;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px;">Confirm Your Email Address</h1>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <!-- Copy block -->
-    <tr>
-      <td align="center" bgcolor="#e9ecef">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
-          <tr>
-            <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
-              <p style="margin: 0;">Hello {{name}},<br><br> Tap <a href="{{verificationUrl}}" target="_blank" style="color: #ffffff; text-decoration: none; background-color: #7152F3; padding: 12px 24px; border-radius: 6px;">this link</a> to confirm your email address.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <!-- Footer -->
-    <tr>
-      <td align="center" bgcolor="#e9ecef" style="padding: 24px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
-          <tr>
-            <td align="center" bgcolor="#e9ecef" style="padding: 12px 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; color: #666;">
-              <p style="margin: 0;">Your company details</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-  <!-- End of the email body -->
+
+<body class="bg-slate-200 flex justify-center text-black tracking-wider">
+  <section class=" bg-white w-3/4 h-screen flex flex-col items-center p-4 gap-5">
+    <div class="h-36 w-full flex justify-center items-center gap-4">
+      <img src="./logo.png" class="w-16">
+      <h1 class="text-3xl font-black font-mono text-blue-600">NovenciaHR</h1>
+    </div>
+    <section class="h-full border-slate-100 rounded-lg border-2 w-2/3 p-16">
+      <h1 class="text-4xl">Hi {{name}} ,Welcome to NovenciaHR !</h1>
+      <div class="w-16 h-1 bg-blue-600 my-8 rounded-md"></div>
+      <p class="font-mono">Before you start, please confirm your email address.</p>
+      <p class="font-mono">We know it’s a boring process, but it’s our only way <br> to stop bots. Because you are not a robot, isn’t it?</p>
+      <button class="rounded-full font-semibold text-white my-8 p-3 bg-blue-400"><a href="{{verificationUrl}}" >Confirm My Email</a></button>
+    </section>
+    <div class="bg-slate-100 h-36 w-full flex flex-col justify-center items-center">
+      <p class="text-xs text-slate-300 mb-4">Copyright ©️ 2024 NovenciaHR All rights reserved.</p>
+      <p class="text-xs text-slate-300">[Novencia, area consulting]</p>
+      <p class="text-xs text-slate-300">Montplaisir, Japan St, Tunis</p>
+      <p class="text-xs text-slate-300">3éme étage, Apt. 3-1 et 3-2</p>
+    </div>
+  </section>
 </body>
+
 </html>
+
+
+  <!-- End of the email body -->
