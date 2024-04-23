@@ -12,7 +12,8 @@ const SendWelcomeEmail = async (user, userpassword, companyname, manager) => {
             .replace('{{useremail}}', user.email)
             .replace('{{userpassword}}', userpassword)
             .replace('{{managerfirstname}}', manager.firstname)
-            .replace('{{managerlastname}}', manager.lastname);
+            .replace('{{managerlastname}}', manager.lastname)
+            .replace('{{Domain}}', process.env.DOMAIN)
 
 
         await transporter.sendMail({
