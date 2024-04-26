@@ -90,6 +90,10 @@ const attendanceRouter = require('./routes/attendance');
 app.use('/api/attendance', attendanceRouter);
 
 
+const articleRouter = require('./routes/article');
+app.use('/api/articles', articleRouter);
+
+
 
 
 

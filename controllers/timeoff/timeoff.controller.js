@@ -26,6 +26,8 @@ const AddNewTimeOff = async (req, res) => {
         console.log(req.body)
         const errors = {}
         let { type, description, daterange, file } = req.body
+        
+       
         daterange = daterange.map(dateString => {
             let date = new Date(dateString);
             date.setDate(date.getDate() + 1);
@@ -43,6 +45,8 @@ const AddNewTimeOff = async (req, res) => {
         if (!description) {
             errors.description = "Description is required"
         }
+       
+                       
         const Policy = await Policies.findOne({ _id: req.user.policy })
 
 
