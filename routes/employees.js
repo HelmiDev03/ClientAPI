@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { GetAllEmployees , AddNewEmployee ,GetEmployee, DeleteEmployee ,UpdateEmployeeManager} = require('../controllers/employees.controller');
+const { GetAllEmployees , AddNewEmployee ,GetEmployee, DeleteEmployee ,UpdateEmployeeManager,DeleteEmployeeMobile} = require('../controllers/employees.controller');
 
 
 
@@ -16,7 +16,8 @@ router.delete('/deleteemployee/:id/:publicId',passport.authenticate('jwt' , {ses
 router.put('/updatemanager/:employeeid/:managerid',passport.authenticate('jwt' , {session : false}) , UpdateEmployeeManager)
 
 
-
+//mobile
+router.delete('/deleteemployeemobile/:id',passport.authenticate('jwt' , {session : false}) , DeleteEmployeeMobile )
 
 
 

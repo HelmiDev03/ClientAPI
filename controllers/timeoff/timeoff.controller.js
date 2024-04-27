@@ -265,7 +265,20 @@ const GetEmployeeTimeOffs = async (req, res) => {
 
 
 
+const GetCompanyTimeOffs = async (req, res) => {
+    try {
+        let timeoffs = await TimeOffs.find({ company: req.user.company }).populate('userId', 'firstname lastname profilepicture company');
 
+        // Filter out documents where userId is null before attempting to access userId.company
+        timeoffs = timeoffs.filter(el => el.userId && el.userId.company !== req.user.company);
+        console.log(timeoffs);
+        return res.status(200).json({ timeoffs });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error });
+    }
+};
 
 
 
@@ -280,5 +293,7 @@ module.exports = {
     AddNewTimeOff,
     UpdateTimeOff,
     GetUserTimeOffs,
-    GetEmployeeTimeOffs
+    GetEmployeeTimeOffs,
+    GetCompanyTimeOffs,
+    
 }

@@ -249,7 +249,34 @@ const UpdateEmployeeManager = async (req, res) => {
 
 
 
+const DeleteEmployeeMobile  = async (req, res) => {
+    try {
+        const employee = await Users.findOne({ _id: req.params.id });
+        console.log(employee);
+        if (employee) {
+            await Users.deleteOne({ _id: req.params.id });
 
+            // Removed the check for publicId and the call to deleteImage
+
+            let policies = await Policies.find({ company: req.user.company });
+
+            let policiesWithUsers = [];
+
+            await Promise.all(policies.map(async (policy) => {
+                const employees = await Users.find({ policy: policy._id });
+                const policyWithUsers = { ...policy.toObject(), employees };
+                policiesWithUsers.push(policyWithUsers);
+            }));
+
+            return res.status(200).json({ message: 'Employee deleted successfully', policies: policiesWithUsers });
+        }
+        return res.status(404).json({ message: 'Employee not found' });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: err.message });
+    }
+};
 
 
 
@@ -263,4 +290,5 @@ module.exports = {
     GetEmployee,
     DeleteEmployee,
     UpdateEmployeeManager,
+    DeleteEmployeeMobile,
 }
