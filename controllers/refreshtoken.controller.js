@@ -48,7 +48,7 @@ const RefreshToken = async (req, res) => {
                 policy : findUser.policy,
             },
             process.env.PRIVATE_KEY,
-            { expiresIn: '10m' }
+            { expiresIn: '8h' }
         );
 
         // Send the new token in the response

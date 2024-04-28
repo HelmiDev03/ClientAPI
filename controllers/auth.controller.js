@@ -258,7 +258,7 @@ const Login = async (req, res) => {
         const token = jwt.sign(
             findUser.toJSON(),
             process.env.PRIVATE_KEY,
-            { expiresIn: '10m' }
+            { expiresIn: '8h' }
         );
 
         const refreshToken = jwt.sign(
@@ -452,7 +452,7 @@ const UpdateProfilePictureDecision = async (req, res) => {
                 const token = jwt.sign(
                     updateduser.toJSON(),
                     process.env.PRIVATE_KEY,
-                    { expiresIn: '10m' }
+                    { expiresIn: '8h' }
                 );
                 return res.status(200).json({
                     message: "profile picture updated ",
@@ -493,7 +493,7 @@ const UpdateProfilePictureMobile = async (req, res) => {
         const token = jwt.sign(
             updateduser.toJSON(),
             process.env.PRIVATE_KEY,
-            { expiresIn: '10m' }
+            { expiresIn: '8h' }
         );
         return res.status(200).json({
             message: "profile picture updated ",
@@ -682,7 +682,7 @@ const VerifytfaOtp = async (req, res) => {
             const token = jwt.sign(
                 updateduser.toJSON(),
                 process.env.PRIVATE_KEY,
-                { expiresIn: '10m' }
+                { expiresIn: '8h' }
             );
             return res.status(200).json({ token: "Bearer " + token, message: 'TFA Enabled Successfully' })
         }
@@ -703,7 +703,7 @@ const UpdateTfa = async (req, res) => {
             const token = jwt.sign(
                 updateduser.toJSON(),
                 process.env.PRIVATE_KEY,
-                { expiresIn: '10m' }
+                { expiresIn: '8h' }
             );
             return res.status(200).json({
                 message: "tfa disbaled ",
@@ -787,7 +787,7 @@ const VerifytfaOtpBeforeLogin = async (req, res) => {
         const token = jwt.sign(
             findUser.toJSON(),
             process.env.PRIVATE_KEY,
-            { expiresIn: '10m' }
+            { expiresIn: '8h' }
         );
 
         const refreshToken = jwt.sign(
