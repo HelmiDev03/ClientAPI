@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const { GetPolicies, GetPolicy, CreatePolicy , DeletePolicy,UpdatePolicy ,setnewDefaultPolicy, UpdateEmployeePolicy,AddNewEmployeesToPolicy,CalculateTimeOffDays,CalculateTimeOffDaysOfEmployee   } = require('../controllers/timeoff/policy.controller');
 
-const {AddNewTimeOff,UpdateTimeOff,GetUserTimeOffs,GetEmployeeTimeOffs,GetCompanyTimeOffs} = require('../controllers/timeoff/timeoff.controller');
+const {AddNewTimeOff,UpdateTimeOff,GetUserTimeOffs,GetEmployeeTimeOffs,GetCompanyPenindgTimeOffs,GetCompanyTimeOffs,GtAllEmployeesAcceptedTimeOffs} = require('../controllers/timeoff/timeoff.controller');
 
 //policy
 router.get('/', passport.authenticate('jwt' , {session : false}), GetPolicies ) 
@@ -23,6 +23,8 @@ router.post('/createtimeoff' ,  passport.authenticate('jwt' , {session : false})
 router.put('/updatetimeoff/:id' ,  passport.authenticate('jwt' , {session : false}), UpdateTimeOff)
 router.get('/gettimeoff' ,  passport.authenticate('jwt' , {session : false}), GetUserTimeOffs)
 router.get('/gettimeoff/auth/:id' ,  passport.authenticate('jwt' , {session : false}), GetEmployeeTimeOffs)
+router.get('/getpendingtimeoff' ,  passport.authenticate('jwt' , {session : false}), GetCompanyPenindgTimeOffs)
+router.get('/getacceptedtimeoff' ,  passport.authenticate('jwt' , {session : false}), GtAllEmployeesAcceptedTimeOffs)
 
 
 

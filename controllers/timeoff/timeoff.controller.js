@@ -255,6 +255,17 @@ const GetEmployeeTimeOffs = async (req, res) => {
     }
 }
 
+const GetCompanyPenindgTimeOffs = async (req, res) => {
+    try {
+        const PendingTimeoffs = await TimeOffs.find({ company: req.user.company, etat: "Pending" }).populate('userId', 'firstname lastname profilepicture ')
+        PendingTimeoffs.sort((a, b) => b.createdAt - a.createdAt)
+        return res.status(200).json({ PendingTimeoffs })
+    }
+    catch (error) {
+        return res.status(500).json({ error })
+    }
+}
+
 
 
 
@@ -284,6 +295,69 @@ const GetCompanyTimeOffs = async (req, res) => {
 
 
 
+const GtAllEmployeesAcceptedTimeOffs = async (req, res) => {
+    try{
+        /*
+        const TimeOffSchema = new Schema({
+
+    userId : { type: Schema.Types.ObjectId, ref: 'user' },
+    type :  { type : String , required : true},
+    description  :  { type : String , required : false},
+    daterange : {type:Array , required : true},
+    file : { type : String , required : false},
+    response : { type : String , required : false},
+    etat : { type : String , required : false , default : "Pending"},
+    supervisor : {type:Object , required : false},
+    company : { type: Schema.Types.ObjectId, ref: 'companie' },
+    
+
+
+
+    i wanna return a list exatcly like
+    [                    
+        { 
+            user : { firstname : "firstname" , lastname : "lastname" , profilepicture : "profilepicture" },
+            timeoffs : [ { type : "type"  , daterange : ["startdate" , "enddate"]   } , ... ]
+        } , ...
+    ]
+    */
+
+
+    const timeoffs = await TimeOffs.find({ company: req.user.company , etat : "Approved" })
+    const users = await Users.find({ company: req.user.company });
+    const result = [];
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        const userTimeOffs = timeoffs.filter(timeoff => timeoff.userId.toString() === user._id.toString());
+        if (userTimeOffs.length > 0) {
+            result.push({ user: { _id : user._id , fullname: user.firstname +" " + user.lastname,  profilepicture: user.profilepicture,policy:user.policy }, timeoffs: userTimeOffs });
+        }
+    }
+    
+    console.log(result);
+    return res.status(200).json({ result });
+    
+
+}
+    
+
+
+
+
+
+
+
+
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error });
+    }
+}
+
+
+
+
+
 
 
 
@@ -295,5 +369,7 @@ module.exports = {
     GetUserTimeOffs,
     GetEmployeeTimeOffs,
     GetCompanyTimeOffs,
+    GetCompanyPenindgTimeOffs,
+    GtAllEmployeesAcceptedTimeOffs,
     
 }

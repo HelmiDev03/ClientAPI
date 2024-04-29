@@ -225,6 +225,24 @@ const UpdateTask = async (req, res) => {
 
 
 
+const GetActiveprojects = async (req, res) => {
+    try {
+        const Activeprojects = await Project.find({ company: req.user.company , status: 'Active' }).populate({
+            path: 'users.user',
+            
+        })
+        Activeprojects.sort((a, b) => {
+            return new Date(a.startdate) - new Date(b.startdate);
+        });
+        res.status(200).json({ Activeprojects  });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
 
 
 
@@ -244,7 +262,8 @@ module.exports = {
     CreateTask,
     DeleteTask,
     GetTask,
-    UpdateTask
+    UpdateTask,
+    GetActiveprojects
 
     
 };
