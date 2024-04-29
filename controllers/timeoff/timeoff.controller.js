@@ -329,9 +329,9 @@ const GtAllEmployeesAcceptedTimeOffs = async (req, res) => {
     for (let i = 0; i < users.length; i++) {
         const user = users[i];
         const userTimeOffs = timeoffs.filter(timeoff => timeoff.userId.toString() === user._id.toString());
-        if (userTimeOffs.length > 0) {
-            result.push({ user: { _id : user._id , fullname: user.firstname +" " + user.lastname,  profilepicture: user.profilepicture,policy:user.policy }, timeoffs: userTimeOffs });
-        }
+        
+        result.push({ user: { _id : user._id , fullname: user.firstname +" " + user.lastname,  profilepicture: user.profilepicture,policy:user.policy }, timeoffs: userTimeOffs });
+        
     }
     
     console.log(result);
