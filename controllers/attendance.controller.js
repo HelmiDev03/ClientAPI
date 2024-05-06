@@ -120,6 +120,27 @@ const History = async (req, res) => {
 
 
 
+const EmployeeHistory = async (req, res) => {
+    try {
+        let userAttandance = await Attendance.findOne({ user: req.params.id });
+ 
+        const workingHours = []
+        for (let i = 0; i < userAttandance.workingHours.length; i++) {
+            workingHours.push(userAttandance.workingHours[i])
+        }
+        return res.status(200).json({ workingHours })
+    }
+
+    catch (error) {
+        console.log(error)
+
+        return res.status(500).json({ message: "Internal server error" })
+
+    }
+}
+
+
+
 
 
 
@@ -143,4 +164,5 @@ module.exports = {
     ClockIn,
     ClockOut,
     History,
+    EmployeeHistory,
 }
