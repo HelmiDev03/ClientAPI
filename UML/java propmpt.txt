@@ -1,1 +1,0 @@
-java -jar target/staruml-watermark.jar -d C:\Users\helmi\OneDrive\Desktop\Uml
